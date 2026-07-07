@@ -26,6 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    if(strlen($senha) < 6  || strlen($senha2) < 6){
+        echo "a senha deve conter no minimo 6 caracteres";
+        exit;
+    }
+
     $sql_email = "SELECT id FROM usuarios WHERE email = ? ";
     $stmt = $conn->prepare($sql_email);
     $stmt->bind_param("s", $email);
