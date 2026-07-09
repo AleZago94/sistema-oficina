@@ -13,24 +13,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($nome) || empty($telefone) || empty($cpf)) {
         echo "<script>alert('Preencha todos os campos');</script>";
-    } else {
+        exit;
+    } 
+
         $sql = "INSERT INTO clientes (nome, telefone, cpf) VALUES (?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sss", $nome, $telefone, $cpf);
 
-        if ($stmt->execute()) {
+        if(!$stmt->execute()){
+            echo "erro ao cadastrar cliente ";
+            exit;
+        }
 
-            $cliente_id = $conn->insert_id;
+        $cliente_id = $conn->insert_id;
 
             $sql_moto = "INSERT INTO motos (cliente_id, modelo, placa) VALUES(?, ?, ?)";
             $stmt = $conn->prepare($sql_moto);
             $stmt->bind_param("iss", $cliente_id, $modelo, $placa);
-            $stmt->execute();
 
             //  $conn->query($sql_moto);
+            echo "<script>alert('Cliente cadastrado com sucesso');</script>";
+
+        if (!$stmt->execute()) {
+            echo "erro ao cadastrar moto";
+            exit;
+
+            
         }
-        echo "<script>alert('Cliente cadastrado com sucesso');</script>";
-    }
+        
+    
 }
 $sql_cliente = "SELECT * FROM clientes";
 $result_cliente = $conn->query($sql_cliente);
