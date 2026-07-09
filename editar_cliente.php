@@ -2,7 +2,6 @@
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
 
-$cliente = null;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -13,39 +12,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
     if (empty($nome) || empty($telefone) ||  empty($cpf)) {
-    } else {
-
-        $sql_update = "UPDATE clientes SET nome = ?, telefone = ?, cpf = ?  WHERE id = ?";
-        $stmt = $conn->prepare($sql_update);
-        $stmt->bind_param("sssi", $nome, $telefone, $cpf, $id);
-
-
-        if (!$stmt->execute()) {
-            echo "Erro ao atualizar.";
-            exit;
-        }
-        header("Location: clientes.php");
+        echo "nao existe usuario para editar";
         exit;
     }
+
+
+    $sql_update = "UPDATE clientes SET nome = ?, telefone = ?, cpf = ?  WHERE id = ?";
+    $stmt = $conn->prepare($sql_update);
+    $stmt->bind_param("sssi", $nome, $telefone, $cpf, $id);
+
+
+    if (!$stmt->execute()) {
+        echo "Erro ao atualizar.";
+        exit;
+    }
+    header("Location: clientes.php");
+    exit;
 }
-if (isset($_GET["id"])) {
-    $id = intval($_GET["id"]);
-
-    $sql = "SELECT * FROM  clientes WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-
-
-    $resultado =  $stmt->get_result();
-
-    //$resultado = $conn->query($sql);
-
-    $cliente = $resultado->fetch_assoc();
+if (!isset($_GET["id"])) {
+    header("Location: clientes.php?erro=cliente_nao_encontrado");
+    exit;
 }
 
 
+$id = intval($_GET["id"]);
 
+$sql = "SELECT * FROM  clientes WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+
+$resultado =  $stmt->get_result();
+
+if ($resultado->num_rows == 0) {
+    header("Location: clientes.php?erro=cliente_nao_encontrado");
+    exit;
+}
+
+
+$cliente = $resultado->fetch_assoc();
 
 
 
