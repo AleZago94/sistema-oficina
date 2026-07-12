@@ -3,8 +3,10 @@ require_once "includes/autenticacao.php";
 
 require_once "config/conexao.php";
 
-if (isset($_GET['id'])) {
-
+if (!isset($_GET['id'])) {
+    header("location: ordens.php?erro=ordem_nao_encontrada");
+    exit;
+}
     $id = $_GET['id'];
 
     $sql_ordem = "SELECT  
@@ -18,17 +20,45 @@ if (isset($_GET['id'])) {
     FROM ordens_servico AS os
     JOIN clientes c on os.cliente_id = c.id
     JOIN motos  on os.moto_id =  motos.id 
-    WHERE os.id = $id  ";
-    $ordem = $conn->query($sql_ordem);
+    WHERE os.id = ?  ";
+    $stmt = $conn->prepare($sql_ordem);
+    $stmt->bind_param("i", $id);
+    
+    if(!$stmt->execute()){
+       header("location: ordens.php?erro=id_nao_encontrado");
+    exit;
+
+    }
+    $ordem = $stmt->get_result();
+
+    if($ordem->num_rows == 0){
+       header("location: ordens.php?erro=ordem_nao_encontrada");
+    exit;
+
+    }
     $result = $ordem->fetch_assoc();
-} else {
-    echo "nenhum id encontrado";
-}
+
+
 
 $servicos_existentes = "SELECT servico_id
 FROM ordem_servicos_itens
-WHERE ordem_servico_id = $id";
-$result_existentes = $conn->query($servicos_existentes);
+WHERE ordem_servico_id = ?";
+$stmt = $conn->prepare($servicos_existentes);
+$stmt->bind_param("i", $id);
+
+if(!$stmt->execute()){
+   header("location: ordens.php?erro=servicos_nao_encontrados");
+    exit;
+
+}
+
+$result_existentes = $stmt->get_result();
+
+if($result_existentes->num_rows == 0 ){
+    header("location: ordens.php?erro=servicos_nao_encontrados");
+    exit;
+
+}
 
 $servicos_marcados = [];
 
@@ -41,13 +71,13 @@ $result_servicos = $conn->query($servicos);
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id = $_POST['id'];
-    $cliente_id = $_POST['cliente_id'];
-    $modelo_moto = $_POST['modelo_moto'];
-    $problema_relatado = $_POST['problema_relatado'];
-    $valor_mao_obra = $_POST['valor_mao_obra'];
-    $valor_pecas = $_POST['valor_pecas'];
-    $status = $_POST['status'];
+    $id = intval($_POST['id']);
+    $cliente_id = intval($_POST['cliente_id']);
+    $modelo_moto = trim($_POST['modelo_moto']);
+    $problema_relatado = trim($_POST['problema_relatado']);
+    $valor_mao_obra = floatval($_POST['valor_mao_obra']);
+    $valor_pecas = floatval($_POST['valor_pecas']);
+    $status = trim($_POST['status']);
     $servicos = $_POST['servicos'] ?? [];
 
     if (empty($cliente_id)  || empty($problema_relatado)) {
@@ -55,12 +85,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $sql_update_ordem = "UPDATE ordens_servico 
     SET 
-    problema_relatado = '$problema_relatado',
-    valor_mao_obra = '$valor_mao_obra',
-    valor_pecas = '$valor_pecas',
-    status = '$status'
-    WHERE id = $id";
-        $conn->query($sql_update_ordem);
+    problema_relatado = ?,
+    valor_mao_obra = ?,
+    valor_pecas = ?,
+    status = ?
+    WHERE id = ?";
+    $stmt = $conn->prepare($sql_update_ordem);
+    $stmt->bind_param("sddsi", $problema_relatado, $valor_mao_obra, $valor_pecas, $status, $id);
+
+    if(!$stmt->execute()){
+        header("location: ordens.php?erro=falha_atualizar_orden");
+        exit;
+
+    }
+       // $conn->query($sql_update_ordem);
 
         $ordem_id = $id;
 
@@ -69,9 +107,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $servico_id = intval($servico_id);
 
                 $sql_servico = "INSERT INTO ordem_servicos_itens
-            (ordem_servico_id, servico_id) VALUES ('$ordem_id', '$servico_id')";
+            (ordem_servico_id, servico_id) VALUES ( ? , ? )";
+            $stmt = $conn->prepare($sql_servico);
+            $stmt->bind_param("ii", $ordem_id, $servico_id);
 
-                $conn->query($sql_servico);
+            if(!$stmt->execute()){
+                header("location: ordens.php?erro=falha_insercao");
+                exit;
+            }
+
+               // $conn->query($sql_servico);
             }
         }
         header("Location: ver_ordem.php?id=$ordem_id");

@@ -2,7 +2,6 @@
 require_once "includes/autenticacao.php";
 
 require_once "config/conexao.php";
-$motos = null;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = intval($_POST['id']);
@@ -13,33 +12,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($marca) || empty($modelo) || empty($placa) || empty($ano)) {
         echo "<script>alert('Preencha todos os campos');</script>";
-    } else {
-        $sql_update = "UPDATE motos SET marca = ?, modelo = ?, placa = ?, ano = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql_update);
-        $stmt->bind_param("sssii", $marca, $modelo, $placa, $ano, $id);
-
-        if(!$stmt->execute()){
-            echo "erro na edicao";
-            exit();
-
-        }
-
-        header("location: motos.php");
-        exit();
+        exit;
     }
+
+    $sql_update = "UPDATE motos SET marca = ?, modelo = ?, placa = ?, ano = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql_update);
+    $stmt->bind_param("sssii", $marca, $modelo, $placa, $ano, $id);
+
+    if (!$stmt->execute()) {
+        echo "erro na edicao";
+        exit;
+    }
+
+    header("location: motos.php");
+    exit;
 }
-if (isset($_GET["id"])) {
-    $id = intval($_GET['id']);
-
-    $sql = "SELECT * FROM motos WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    $motos = $result->fetch_assoc();
+if (!isset($_GET["id"])) {
+    header("location: motos.php?erro=id_nao_encontrado");
+    exit;
 }
+$id = intval($_GET['id']);
+
+$sql = "SELECT * FROM motos WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+if ($result->num_rows == 0) {
+    header("location: motos.php?erro=id_inexistente");
+    exit;
+}
+
+$motos = $result->fetch_assoc();
+
 include "includes/header.php";
 include "includes/sidebar.php";
 

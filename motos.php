@@ -5,6 +5,19 @@ require_once "config/conexao.php";
 include "includes/header.php";
 include "includes/sidebar.php";
 
+if (isset($_GET["erro"])) {
+    if($_GET["erro"] == "id_nao_encontrado"){
+        echo "<script>alert('nao foi possivel encontra o id');</script>";
+    }
+
+    if(isset($_GET["erro"]) == "id_inexistente"){
+     echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
+}
+}
+
+
+
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $cliente_id = intval($_POST['cliente_id']);
@@ -99,7 +112,7 @@ $result = $conn->query($sql);
         <div class="container-fluid">
             <h1>Motos cadastradas</h1>
             <?php if ($result->num_rows > 0): ?>
-      <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>cliente</th>

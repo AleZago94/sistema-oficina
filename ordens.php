@@ -3,7 +3,19 @@
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
 
+if (isset($_GET["erro"])) {
+    if ($_GET["erro"] == "ordem_nao_encontrada") {
+        echo "<script>alert('nao foi possivel encontrar a ordem')</script>";
+    }
 
+    if ($_GET["erro"] == "servicos_nao_encontrados") {
+        echo "<script>alert('nao foi possivel encontrar os servicos')</script>";
+    }
+
+    if ($_GET["erro"] == "falha_atualizar_orden") {
+        echo "<script>alert('nao foi possivel fazer a atualizacao da ordem')</script>";
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cliente_id = intval($_POST['cliente_id']);

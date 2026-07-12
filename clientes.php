@@ -3,7 +3,9 @@ require_once 'includes/autenticacao.php';
 require_once 'config/conexao.php';
 
 if (isset($_GET["erro"])) {
-    echo "<script>alert('ERRO AO EDITAR CLIENTE'); </script>";
+    if ($_GET["erro"] == "cliente_nao_encontrado") {
+        echo "<script>alert('ERRO AO EDITAR CLIENTE'); </script>";
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -36,13 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("iss", $cliente_id, $modelo, $placa);
 
     //  $conn->query($sql_moto);
-   
+
 
     if (!$stmt->execute()) {
         echo "erro ao cadastrar moto";
         exit;
-    } 
-    
+    }
+
     echo "<script>alert('Cliente cadastrado com sucesso');</script>";
 }
 $sql_cliente = "SELECT * FROM clientes";
