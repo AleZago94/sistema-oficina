@@ -6,13 +6,20 @@ include "includes/header.php";
 include "includes/sidebar.php";
 
 if (isset($_GET["erro"])) {
-    if($_GET["erro"] == "id_nao_encontrado"){
+    if ($_GET["erro"] == "id_nao_encontrado") {
         echo "<script>alert('nao foi possivel encontra o id');</script>";
     }
 
-    if(isset($_GET["erro"]) == "id_inexistente"){
-     echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
-}
+    if ($_GET["erro"] == "id_inexistente") {
+        echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
+    }
+    if ($_GET["erro"] == "erro_excluir_moto") {
+        echo "<script>alert('nao foi possivel excluir o cadastro de motos')</script>";
+    }
+
+    if ($_GET["erro"] == "id_invalido") {
+        echo "<script>alert('id invalido')</script>";
+    }
 }
 
 

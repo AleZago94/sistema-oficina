@@ -6,6 +6,22 @@ if (isset($_GET["erro"])) {
     if ($_GET["erro"] == "cliente_nao_encontrado") {
         echo "<script>alert('ERRO AO EDITAR CLIENTE'); </script>";
     }
+
+    if ($_GET["erro"] == "erro_ao_excluir") {
+        echo "<script>alert('nao foi possivel excluir o cliente')</script>";
+    }
+
+    if ($_GET["erro"] == "id_invalido") {
+        echo "<script>alert('id invalido')</script>";
+    }
+
+
+    if ($_GET["erro"] == "id_inexistente") {
+        echo "<script>alert('nao foi possivel encontrar  este id');</script>";
+    }
+    if ($_GET["erro"] == "id_nao_encontrado") {
+        echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
