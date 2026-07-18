@@ -3,6 +3,21 @@ require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
 
 
+if (isset($_GET["erro"])) {
+    if ($_GET["erro"] === "falha_ao_salvar") {
+        echo "<script>alert('nao foi possivel salvar a movimentacao')</script>";
+    }
+
+    if ($_GET['erro'] === "campos_vazios") {
+        echo "<script>alert('preecha os campos corretamente')</script>";
+    }
+}
+
+
+if (isset($_GET["sucesso"]) && $_GET["sucesso"] === "movimentacao_salva") {
+    echo "<script>alert('movimentacao cadastrada com sucesso');</script>";
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     //  $id = $_POST['id'];
     $tipo = trim($_POST['tipo']);
@@ -13,14 +28,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
     if (empty($tipo) || empty($descricao) || empty($valor)) {
-        echo "preencha todos os campos";
-    } else {
-        $sql_insert = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor) VALUES('$tipo', '$descricao', '$valor')";
-        $insert = $conn->query($sql_insert);
-
-        header("location: financeiro.php");
+        header("location: financeiro.php?erro=campos_vazios");
         exit;
     }
+
+    $sql_insert = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor) VALUES(?, ?, ?)";
+    $stmt = $conn->prepare($sql_insert);
+    $stmt->bind_param("ssd", $tipo, $descricao, $valor);
+
+    if (!$stmt->execute()) {
+        header("location: financeiro.php?erro=falha_ao_salvar");
+        exit;
+    }
+
+    header("location: financeiro.php?sucesso=movimentacao_salva");
 }
 
 
@@ -57,7 +78,7 @@ $sql_soma = "SELECT SUM(s.valor) AS total
                FROM ordem_servicos_itens osi
 JOIN servicos s ON osi.servico_id = s.id
 JOIN ordens_servico os ON osi.ordem_servico_id = os.id
-                WHERE os.id = 'aberta'";
+                WHERE os.status = 'aberta'";
 
 $soma = $conn->query($sql_soma);
 $total = $soma->fetch_assoc();
@@ -77,7 +98,7 @@ include "includes/sidebar.php";
                 <div class="col-lg-3 col-6">
                     <div class="small-box text-bg-primary">
                         <div class="inner">
-                            <h3><?php echo number_format($entrada['total_entrada'], 2, ',', '.'); ?></h3>
+                            <h3><?php echo number_format($valor_entrada, 2, ',', '.'); ?></h3>
                             <p>total Entradas:</p>
 
                         </div>
@@ -92,7 +113,7 @@ include "includes/sidebar.php";
                 <div class="col-lg-3 col-6">
                     <div class="small-box text-bg-warning">
                         <div class="inner">
-                            <h3><?php echo number_format($saida['total_saida'], 2, ',', '.'); ?></h3>
+                            <h3><?php echo number_format($valor_saida, 2, ',', '.'); ?></h3>
                             <p>total saidas</p>
 
                         </div>
