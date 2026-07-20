@@ -6,19 +6,42 @@ include "includes/header.php";
 include "includes/sidebar.php";
 
 if (isset($_GET["erro"])) {
-    if ($_GET["erro"] == "id_nao_encontrado") {
-        echo "<script>alert('nao foi possivel encontra o id');</script>";
-    }
 
-    if ($_GET["erro"] == "id_inexistente") {
-        echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
-    }
-    if ($_GET["erro"] == "erro_excluir_moto") {
-        echo "<script>alert('nao foi possivel excluir o cadastro de motos')</script>";
-    }
+    switch ($_GET["erro"]) {
 
-    if ($_GET["erro"] == "id_invalido") {
-        echo "<script>alert('id invalido')</script>";
+        case "id_nao_encontrado":
+            echo "<script>alert('nao foi possivel encontra o id');</script>";
+            break;
+
+        case "id_inexistente":
+            echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
+            break;
+
+        case "erro_excluir_moto":
+            echo "<script>alert('nao foi possivel excluir o cadastro de motos')</script>";
+            break;
+
+        case "id_invalido":
+            echo "<script>alert('id invalido')</script>";
+            break;
+
+        case "campos_vazios":
+            echo "<script>alert('preencha os campos corretamente')</script>";
+            break;
+
+        case "falha_no_cadastro":
+            echo "<script>alert('falha ao cadastrar moto tente novamente')</script>";
+            break;
+    }
+}
+
+if (isset($_GET["sucesso"])) {
+
+    switch ($_GET["sucesso"]) {
+
+        case "moto_cadastrada":
+            echo "<script>alert('moto cadastrada com sucesso')</script>";
+            break;
     }
 }
 
@@ -35,12 +58,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $observacoes = trim($_POST['observacoes']);
 
     if (empty($marca) || empty($modelo) || empty($placa) || empty($ano) || empty($observacoes) || empty($cliente_id)) {
-        echo "<script>alert('preencha os campos corretamente')</script>";
-    } else {
-        $sql_cadastro = "INSERT INTO motos (cliente_id, marca, modelo, placa, ano, observacoes) VALUES('$cliente_id', '$marca', '$modelo', '$placa', '$ano', '$observacoes')";
-
-        $result_cadastro = $conn->query($sql_cadastro);
+        header("location: motos.php?erro=campos_vazios");
+        exit;
     }
+
+    $sql_cadastro = "INSERT INTO motos (cliente_id, marca, modelo, placa, ano, observacoes) VALUES(?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql_cadastro);
+    $stmt->bind_param("isssss", $cliente_id, $marca, $modelo, $placa, $ano, $observacoes);
+
+    if (!$stmt->execute()) {
+        header("location: motos.php?erro=falha_no_cadastro");
+        exit;
+    }
+
+    header("location: motos.php?sucesso=moto_cadastrada");
+    exit;
 }
 
 
