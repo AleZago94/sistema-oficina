@@ -4,19 +4,29 @@ require_once "config/conexao.php";
 
 
 if (isset($_GET["erro"])) {
-    if ($_GET["erro"] === "falha_ao_salvar") {
-        echo "<script>alert('nao foi possivel salvar a movimentacao')</script>";
+
+    switch ($_GET["erro"]) {
+
+        case "falha_ao_salvar":
+            echo "<script>alert('nao foi possivel salvar a movimentacao')</script>";
+            break;
+
+        case "campos_vazios":
+            echo "<script>alert('preecha os campos corretamente')</script>";
+            break;
     }
 
-    if ($_GET['erro'] === "campos_vazios") {
-        echo "<script>alert('preecha os campos corretamente')</script>";
-    }
 }
 
 
-if (isset($_GET["sucesso"]) && $_GET["sucesso"] === "movimentacao_salva") {
-    echo "<script>alert('movimentacao cadastrada com sucesso');</script>";
+switch($_GET["sucesso"]){
+    case "movimentacao_salva":
+         echo "<script>alert('movimentacao cadastrada com sucesso');</script>";
+         break;
+
+
 }
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     //  $id = $_POST['id'];
@@ -42,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     header("location: financeiro.php?sucesso=movimentacao_salva");
+    exit;
 }
 
 
