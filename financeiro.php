@@ -15,16 +15,17 @@ if (isset($_GET["erro"])) {
             echo "<script>alert('preecha os campos corretamente')</script>";
             break;
     }
-
 }
 
 
-switch($_GET["sucesso"]){
-    case "movimentacao_salva":
-         echo "<script>alert('movimentacao cadastrada com sucesso');</script>";
-         break;
+if (isset($_GET["sucesso"])) {
 
-
+    switch ($_GET["sucesso"]) {
+        
+        case "movimentacao_salva":
+            echo "<script>alert('movimentacao cadastrada com sucesso');</script>";
+            break;
+    }
 }
 
 
