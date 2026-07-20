@@ -5,6 +5,13 @@ require_once "config/conexao.php";
 include "includes/header.php";
 include "includes/sidebar.php";
 
+switch ($_GET["sucesso"]) {
+
+  case "usuario_autenticado":
+    echo "<script>alert('Olá, " . $_SESSION['usuario_nome'] . "! ')</script>";
+    break;
+}
+
 $sql_clientes = "SELECT COUNT(*) AS total FROM clientes";
 $total_clientes = $conn->query($sql_clientes)->fetch_assoc()['total'];
 
