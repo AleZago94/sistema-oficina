@@ -1,51 +1,68 @@
 <?php
 session_start();
 
-if(isset($_SESSION['usuario_id'])){
+if (isset($_SESSION['usuario_id'])) {
     header("location: index.php");
     exit;
+}
+if (isset($_GET["erro"])) {
+
+    switch ($_GET["erro"]) {
+
+        case "falha_na_autenticacao":
+            echo "<script>alert('usuario ou senha estao incorretos')</script>";
+            break;
+
+        case "usuario_nao_encontrado":
+            echo "<script>alert('nao existe usuario com este email')</script>";
+            break;
+
+        case "campos_vazios":
+            echo "<script>alert('informe o usuario e senha')</script>";
+            break;
+    }
 }
 
 include "config/conexao.php";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    $usuario = $_POST['usuario'];
-    $senha = $_POST['senha'];
+    $usuario =  trim($_POST['usuario']);
+    $senha = trim($_POST['senha']);
 
     if (empty($usuario) || empty($senha)) {
-        echo "informe o usuario e senha";
-    } else {
-
-        $login = "SELECT id, nome, senha FROM usuarios where email = ?";
-        $stmt = $conn->prepare($login);
-        $stmt->bind_param("s", $usuario);
-        $stmt->execute();
-        $sql_login = $stmt->get_result();
-
-       // $sql_login = $conn->query($login);
-
-        if ($sql_login->num_rows > 0) {
-
-            $result_login = $sql_login->fetch_assoc();
-
-            $senha_login = $result_login['senha'];
-
-            if (password_verify($senha, $senha_login)) {
-                //senha correta 
-                $_SESSION['usuario_id'] = $result_login['id'];
-                $_SESSION['usuario_nome'] = $result_login['nome'];
-
-                header("Location: index.php");
-                exit;
-            } else {
-                echo "senha incorreta";
-            }
-        } else {
-            echo "usuario nao encontrado";
-        }
+        header("location: login.php?erro=campos_vazios");
+        exit;
     }
+
+    $login = "SELECT id, nome, senha FROM usuarios where email = ?";
+    $stmt = $conn->prepare($login);
+    $stmt->bind_param("s", $usuario);
+    $stmt->execute();
+    $sql_login = $stmt->get_result();
+
+    // $sql_login = $conn->query($login);
+
+    if ($sql_login->num_rows <= 0) {
+        header("location: login.php?erro=usuario_nao_encontrado");
+        exit;
+    }
+
+    $result_login = $sql_login->fetch_assoc();
+
+    if (password_verify($senha, $result_login['senha'])) {
+        //senha correta 
+        $_SESSION['usuario_id'] = $result_login['id'];
+        $_SESSION['usuario_nome'] = $result_login['nome'];
+
+        header("Location: index.php?sucesso=usuario_autenticado");
+        exit;
+    }
+
+    header("location: login.php?erro=falha_na_autenticacao");
+    exit;
 }
+
 
 include "includes/header.php";
 include "includes/sidebar.php";
