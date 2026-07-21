@@ -6,17 +6,57 @@ require_once "config/conexao.php";
 include "includes/header.php";
 include "includes/sidebar.php";
 
+if(isset($_GET["erro"])){
+
+switch($_GET["erro"]){
+
+    case "campos_vazios":
+         echo "<script>alert('preencha todos os campos')</script>";
+         break;
+
+    case "falha_inserir_servicos":
+        echo "<script>alert('falha ao inserir servico')</script>";
+        break;
+
+}
+
+}
+
+if(isset($_GET["sucesso"])){
+
+switch($_GET["sucesso"]){
+
+case "servico_cadastrado_sucesso":
+    echo "<script>alert('servico cadastrado com sucesso')</script>";
+    break;
+
+}
+
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nome = trim($_POST['nome']);
     $valor = floatval($_POST['valor']);
 
 
     if (empty($nome) || empty($valor)) {
-        echo "<script>alert('preencha todos os campos')</script>";
-    } else {
-        $sql_servicos = "INSERT INTO servicos(nome, valor) VALUES('$nome', '$valor')";
-        $result_servicos = $conn->query($sql_servicos);
+        header("location: servicos.php?erro=campos_vazios");
+        exit;
+       
     }
+        $sql_servicos = "INSERT INTO servicos(nome, valor) VALUES(?, ?)";
+        $stmt = $conn->prepare($sql_servicos);
+        $stmt->bind_param("sd", $nome, $valor);
+
+        if(!$stmt->execute()){
+            header("location: servicos.php?erro=falha_inserir_servicos");
+            exit;
+
+        }
+
+        header("location: servicos.php?sucesso=servico_cadastrado_sucesso");
+        exit;
+    
 }
 
 $sql = "SELECT * FROM servicos ORDER BY nome ASC";
