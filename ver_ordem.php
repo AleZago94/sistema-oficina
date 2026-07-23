@@ -2,6 +2,62 @@
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
 
+if (isset($_GET["erro"])) {
+
+    switch ($_GET["erro"]) {
+
+        case "falha_obter_status":
+            echo "<script>alert('status nao econtrado')</script>";
+            break;
+
+        case "ordem_nao_encontrada":
+            echo "<script>alert('ordem nao econtrada')</script>";
+            break;
+
+        case "falha_verificar_movimentacao":
+            echo "<script>alert('falha na movimentacao')</script>";
+            break;
+
+
+        case "movimentacao_ja_existe":
+            echo "<script>alert('ja existe uma movimentacao')</script>";
+            break;
+
+        case "falha_ao_calcular":
+            echo "<script>alert('falha ao somar OS')</script>";
+            break;
+
+        case "falha_inserir_movimentacao":
+            echo "<script>alert('falha ao inserir a movimentacao')</script>";
+            break;
+
+        case "falha_update":
+            echo "<script>alert('falha ao atualizar')</script>";
+            break;
+
+        case "OS_concluida":
+            echo  "<script>alert('nao é possivel concluir. OS ja concluida')</script>";
+            break;
+
+        case "falha_cancelar_OS":
+            echo "<script>alert('nao é possivel cancelar os ja cancelada')</script>";
+            break;
+    }
+}
+
+
+if (isset($_GET["sucesso"])) {
+    switch ($_GET["sucesso"]) {
+
+        case "ordem_cancelada":
+            echo "<script>alert('OS cancelada')</script>";
+            break;
+
+        case "cadastro_efetuado":
+            echo "<script>alert('cadastro efetuado com sucesso')</script>";
+            break;
+    }
+}
 $ordem = null;
 $result_item = null;
 
@@ -18,84 +74,151 @@ if (isset($_GET['id'])) {
 
         $concluir_status = "SELECT status
                             FROM ordens_servico
-                            WHERE id = $id";
-        $result_concluir = $conn->query($concluir_status);
+                            WHERE id = ?";
+
+        $stmt_concluir = $conn->prepare($concluir_status);
+        $stmt_concluir->bind_param("i", $id);
+
+        if (!$stmt_concluir->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_obter_status");
+            exit;
+        }
+        $result_concluir = $stmt_concluir->get_result();
         $status_concluir = $result_concluir->fetch_assoc();
+
+        if (!$status_concluir) {
+            header("location: ver_ordem.php?id=$id&erro=ordem_nao_encontrada");
+            exit;
+        }
 
         $status_concluir = $status_concluir['status'];
 
-        if ($status_concluir == 'aberta' || $status_concluir == 'em_andamento') {
+        if ($status_concluir !== 'aberta' && $status_concluir !== 'em_andamento') {
+            header("location: ver_ordem.php?id=$id&erro=OS_concluida");
+            exit;
+        }
 
-            $status = "SELECT id
+        $sql_movimentacao = "SELECT id
                   FROM movimentacoes_financeiras 
                   WHERE origem = 'os'
-                  AND ordem_id = $id";
+                  AND ordem_id = ?";
 
-            $result = $conn->query($status);
+        $stmt_movimentacao = $conn->prepare($sql_movimentacao);
+        $stmt_movimentacao->bind_param("i", $id);
 
-            if ($result->num_rows > 0) {
-            } else {
+        if (!$stmt_movimentacao->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_verificar_movimentacao");
+            exit;
+        }
 
-                $descricao = "OS #$id";
-                $sql_update = "UPDATE ordens_servico 
+        $result_movimentacao = $stmt_movimentacao->get_result();
+
+        if ($result_movimentacao->num_rows > 0) {
+            header("location: ver_ordem.php?id=$id&erro=movimentacao_ja_existe");
+            exit;
+        }
+
+
+        $descricao = "OS #$id";
+        $sql_update = "UPDATE ordens_servico 
                        SET status = 'concluida'
-                       WHERE id = $id";
+                       WHERE id = ?";
+        $stmt_update = $conn->prepare($sql_update);
+        $stmt_update->bind_param("i", $id);
 
-                $conn->query($sql_update);
+        if (!$stmt_update->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_update");
+            exit;
+        }
 
-                $sql_soma_os = " SELECT SUM(s.valor) AS total
+
+        $sql_soma_os = " SELECT SUM(s.valor) AS total
         FROM ordem_servicos_itens osi
         JOIN servicos s ON osi.servico_id = s.id
         JOIN ordens_servico os ON osi.ordem_servico_id = os.id
-        WHERE os.id = $id ";
+        WHERE os.id = ? ";
 
-                $soma = $conn->query($sql_soma_os);
-                $soma_os = $soma->fetch_assoc();
+        $stmt_soma_os = $conn->prepare($sql_soma_os);
+        $stmt_soma_os->bind_param("i", $id);
 
-                $os = $soma_os['total'] ?? 0;
-
-
-                $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES ('$tipo', '$descricao', '$os', '$origem', '$id')";
-
-                $conn->query($insert_os);
-
-                header("Location: ver_ordem.php?id=$id");
-                exit;
-            }
-        } else {
-            echo "nao é possivel concluir os ja concluida";
+        if (!$stmt_soma_os->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_ao_calcular");
+            exit;
         }
+        $soma = $stmt_soma_os->get_result();
+        $soma_os = $soma->fetch_assoc();
+
+        $os = $soma_os['total'] ?? 0;
+
+
+        $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES (?, ?, ?, ?, ?)";
+
+        $stmt_insert_os = $conn->prepare($insert_os);
+        $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $os, $origem, $id);
+
+        if (!$stmt_insert_os->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
+            exit;
+        }
+
+        header("Location: ver_ordem.php?id=$id&sucesso=cadastro_efetuado");
+        exit;
     }
+
 
     if (isset($_GET['cancelar'])) {
 
         $cancela_status = "SELECT status
                            FROM ordens_servico
-                           WHERE id = $id";
+                           WHERE id = ?";
 
-        $result_status = $conn->query($cancela_status);
+        $stmt_cancela_status = $conn->prepare($cancela_status);
+        $stmt_cancela_status->bind_param("i", $id);
+
+        if (!$stmt_cancela_status->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_obter_status");
+            exit;
+        }
+
+        $result_status = $stmt_cancela_status->get_result();
+
+        if ($result_status->num_rows <= 0) {
+            header("location: ver_ordem.php?id=$id&erro=ordem_nao_encontrada");
+            exit;
+        }
 
         $status_cancelar = $result_status->fetch_assoc();
         $status_os = $status_cancelar['status'];
 
-        if ($status_os == 'aberta' || $status_os == 'em_andamento') {
-            $sql_cancelar = "UPDATE ordens_servico 
+        if ($status_os !== 'aberta' && $status_os !== 'em_andamento') {
+
+            header("location: ver_ordem.php?id=$id&erro=falha_cancelar_OS");
+            exit;
+        }
+        $sql_cancelar = "UPDATE ordens_servico 
                          SET status = 'cancelada'
                          WHERE id = $id";
 
-            $conn->query($sql_cancelar);
+        $stmt_cancelar_os = $conn->prepare($sql_cancelar);
+        $stmt_cancelar_os->bind_param("i", $id);
 
-            header("Location: ver_ordem.php?id=$id");
+        if (!$stmt_cancelar_os->execute()) {
+            header("location: ver_ordem.php?id=$id&erro=falha_cancelar_os");
             exit;
-        } else {
-            echo "nao é possivel cancelar os ja cancelada";
         }
-    }
+
+        header("Location: ver_ordem.php?id=$id&sucesso=ordem_cancelada");
+        exit;
+    } //else {
+    //echo "nao é possivel cancelar os ja cancelada";
+    // }
+}
 
 
 
-    // buscar OS sempre que tiver id
-    $sql = "SELECT os.id,
+
+// buscar OS sempre que tiver id
+$sql = "SELECT os.id,
                    os.status,
                    os.problema_relatado,
                    os.created_at,
@@ -106,21 +229,44 @@ if (isset($_GET['id'])) {
             FROM ordens_servico os
             JOIN clientes c ON os.cliente_id = c.id
             JOIN motos m ON os.moto_id = m.id
-            WHERE os.id = $id";
+            WHERE os.id = ?";
 
-    $result = $conn->query($sql);
-    $ordem = $result->fetch_assoc();
+$stmt_buscar_os = $conn->prepare($sql);
+$stmt_buscar_os->bind_param("i", $id);
 
-    $sql_item = "SELECT 
+if (!$stmt_buscar_os->execute()) {
+    header("location: ver_ordem.php?id=$id&erro=falha_ober_id");
+    exit;
+}
+
+
+$result = $stmt_buscar_os->get_result();
+
+if ($result->num_rows <= 0) {
+    header("location: ver_ordem.php?id=$id&erro=falha_obter_dados");
+    exit;
+}
+
+$ordem = $result->fetch_assoc();
+
+$sql_item = "SELECT 
                     osi.*, 
                     servicos.nome AS os_nome,
                     servicos.valor
                  FROM ordem_servicos_itens osi
                  JOIN servicos ON osi.servico_id = servicos.id 
-                 WHERE osi.ordem_servico_id = $id";
+                 WHERE osi.ordem_servico_id = ?";
 
-    $result_item = $conn->query($sql_item);
+$stmt_item = $conn->prepare($sql_item);
+$stmt_item->bind_param("i", $id);
+
+if (!$stmt_item->execute()) {
+    header("location: ver_ordem.php?id=$id&erro=items_nao_econtrados");
+    exit;
 }
+
+$result_item = $stmt_item->get_result();
+
 include "includes/header.php";
 include "includes/sidebar.php";
 ?>
