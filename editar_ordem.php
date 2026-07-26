@@ -7,9 +7,9 @@ if (!isset($_GET['id'])) {
     header("location: ordens.php?erro=ordem_nao_encontrada");
     exit;
 }
-    $id = $_GET['id'];
+$id = $_GET['id'];
 
-    $sql_ordem = "SELECT  
+$sql_ordem = "SELECT  
     os.id,
     os.problema_relatado,
     os.valor_mao_obra,
@@ -21,22 +21,20 @@ if (!isset($_GET['id'])) {
     JOIN clientes c on os.cliente_id = c.id
     JOIN motos  on os.moto_id =  motos.id 
     WHERE os.id = ?  ";
-    $stmt = $conn->prepare($sql_ordem);
-    $stmt->bind_param("i", $id);
-    
-    if(!$stmt->execute()){
-       header("location: ordens.php?erro=id_nao_encontrado");
+$stmt = $conn->prepare($sql_ordem);
+$stmt->bind_param("i", $id);
+
+if (!$stmt->execute()) {
+    header("location: ordens.php?erro=id_nao_encontrado");
     exit;
+}
+$ordem = $stmt->get_result();
 
-    }
-    $ordem = $stmt->get_result();
-
-    if($ordem->num_rows == 0){
-       header("location: ordens.php?erro=ordem_nao_encontrada");
+if ($ordem->num_rows == 0) {
+    header("location: ordens.php?erro=ordem_nao_encontrada");
     exit;
-
-    }
-    $result = $ordem->fetch_assoc();
+}
+$result = $ordem->fetch_assoc();
 
 
 
@@ -46,18 +44,16 @@ WHERE ordem_servico_id = ?";
 $stmt = $conn->prepare($servicos_existentes);
 $stmt->bind_param("i", $id);
 
-if(!$stmt->execute()){
-   header("location: ordens.php?erro=servicos_nao_encontrados");
+if (!$stmt->execute()) {
+    header("location: ordens.php?erro=servicos_nao_encontrados");
     exit;
-
 }
 
 $result_existentes = $stmt->get_result();
 
-if($result_existentes->num_rows == 0 ){
+if ($result_existentes->num_rows == 0) {
     header("location: ordens.php?erro=servicos_nao_encontrados");
     exit;
-
 }
 
 $servicos_marcados = [];
@@ -72,7 +68,7 @@ $result_servicos = $conn->query($servicos);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = intval($_POST['id']);
-    $cliente_id = intval($_POST['cliente_id']);
+    $cliente_id = trim($_POST['cliente_id']);
     $modelo_moto = trim($_POST['modelo_moto']);
     $problema_relatado = trim($_POST['problema_relatado']);
     $valor_mao_obra = floatval($_POST['valor_mao_obra']);
@@ -81,9 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $servicos = $_POST['servicos'] ?? [];
 
     if (empty($cliente_id)  || empty($problema_relatado)) {
-        echo "<script>alert('Preencha todos os campos');</script>";
-    } else {
-        $sql_update_ordem = "UPDATE ordens_servico 
+        header("location: editar_ordem.php?erro=campos_vazios");
+        exit;
+    }
+    $sql_update_ordem = "UPDATE ordens_servico 
     SET 
     problema_relatado = ?,
     valor_mao_obra = ?,
@@ -93,35 +90,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $conn->prepare($sql_update_ordem);
     $stmt->bind_param("sddsi", $problema_relatado, $valor_mao_obra, $valor_pecas, $status, $id);
 
-    if(!$stmt->execute()){
+    if (!$stmt->execute()) {
         header("location: ordens.php?erro=falha_atualizar_orden");
         exit;
-
     }
-       // $conn->query($sql_update_ordem);
+    // $conn->query($sql_update_ordem);
 
-        $ordem_id = $id;
+    $ordem_id = $id;
 
-        foreach ($servicos as $servico_id) {
-            if (!in_array($servico_id, $servicos_marcados)) {
-                $servico_id = intval($servico_id);
+    foreach ($servicos as $servico_id) {
+        if (!in_array($servico_id, $servicos_marcados)) {
+            $servico_id = intval($servico_id);
 
-                $sql_servico = "INSERT INTO ordem_servicos_itens
+            $sql_servico = "INSERT INTO ordem_servicos_itens
             (ordem_servico_id, servico_id) VALUES ( ? , ? )";
             $stmt = $conn->prepare($sql_servico);
             $stmt->bind_param("ii", $ordem_id, $servico_id);
 
-            if(!$stmt->execute()){
+            if (!$stmt->execute()) {
                 header("location: ordens.php?erro=falha_insercao");
                 exit;
             }
-
-               // $conn->query($sql_servico);
-            }
         }
-        header("Location: ver_ordem.php?id=$ordem_id");
-        exit;
     }
+    header("Location: ver_ordem.php?id=$ordem_id");
+    exit;
 }
 
 
@@ -146,8 +139,8 @@ include "includes/sidebar.php";
                 </div>
 
                 <div class="mb-3">
-                    <label for="problema_relatadao" class="form-label"> problema relatado </label>
-                    <input type="texte" name="problema_relatado" id="problema_relatado" value="<?php echo $result['problema_relatado']; ?>">
+                    <label for="problema_relatada" class="form-label"> problema relatado </label>
+                    <input type="text" name="problema_relatado" id="problema_relatado" value="<?php echo $result['problema_relatado']; ?>">
                 </div>
 
                 <div class="mb-3">
@@ -197,20 +190,6 @@ include "includes/sidebar.php";
 
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar edicao </button>
-
-
-                <!-- if ($ordem->num_rows > 0): {
-
-
-            echo $result['nome_cliente'];
-            echo $result['modelo_moto'];
-            echo $result['problema_relatado'];
-            echo $result['valor_mao_obra'];
-            echo $result['valor_pecas'];
-            echo $result['status'];
-        }
-    endif; -->
-
 
             </form>
 
