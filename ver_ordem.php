@@ -42,6 +42,18 @@ if (isset($_GET["erro"])) {
         case "falha_cancelar_OS":
             echo "<script>alert('nao é possivel cancelar os ja cancelada')</script>";
             break;
+
+        case "falha_ao_preparar_atualizacao":
+            echo "<script>alert('houve uma falha ao tentar atualizar OS tente novamente ou contate ADM')</script>";
+            break;
+
+        case "falha_ao_preparar_soma":
+            echo "<script>alert('falha ao somar tente novamente ou contate ADM')</script>";
+            break;
+
+        case "falha_ao_preparar_movimentacao":
+            echo "<script>alert('falha na movimentacao tente novamente ou contate ADM')</script>";
+            break;
     }
 }
 
@@ -120,49 +132,86 @@ if (isset($_GET['id'])) {
 
 
         $descricao = "OS #$id";
-        $sql_update = "UPDATE ordens_servico 
+
+        try {
+            $conn->begin_transaction();
+
+            $sql_update = "UPDATE ordens_servico 
                        SET status = 'concluida'
                        WHERE id = ?";
-        $stmt_update = $conn->prepare($sql_update);
-        $stmt_update->bind_param("i", $id);
+            $stmt_update = $conn->prepare($sql_update);
 
-        if (!$stmt_update->execute()) {
-            header("location: ver_ordem.php?id=$id&erro=falha_update");
-            exit;
-        }
+            //   if ($stmt_update === false) {
+            //     $conn->rollback();
+            //   header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_atualizacao");
+            // exit;
+            // }
+
+            $stmt_update->bind_param("i", $id);
+            $stmt_update->execute();
+
+            //if (!$stmt_update->execute()) {
+            //    $conn->rollback();
+            //      header("location: ver_ordem.php?id=$id&erro=falha_update");
+            //      exit;
+            //    }
 
 
-        $sql_soma_os = " SELECT SUM(s.valor) AS total
+            $sql_soma_os = " SELECT SUM(s.valor) AS total
         FROM ordem_servicos_itens osi
         JOIN servicos s ON osi.servico_id = s.id
         JOIN ordens_servico os ON osi.ordem_servico_id = os.id
         WHERE os.id = ? ";
 
-        $stmt_soma_os = $conn->prepare($sql_soma_os);
-        $stmt_soma_os->bind_param("i", $id);
+            $stmt_soma_os = $conn->prepare($sql_soma_os);
 
-        if (!$stmt_soma_os->execute()) {
-            header("location: ver_ordem.php?id=$id&erro=falha_ao_calcular");
+            //  if ($stmt_soma_os === false) {
+            //       $conn->rollback();
+            //     header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_soma");
+            //         exit;
+            //    }
+            $stmt_soma_os->bind_param("i", $id);
+            $stmt_soma_os->execute();
+
+            // if (!$stmt_soma_os->execute()) {
+            //     $conn->rollback();
+            //     header("location: ver_ordem.php?id=$id&erro=falha_ao_calcular");
+            //     exit;
+            // }
+            $soma = $stmt_soma_os->get_result();
+            $soma_os = $soma->fetch_assoc();
+
+            $os = $soma_os['total'] ?? 0;
+
+
+            $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES (?, ?, ?, ?, ?)";
+
+            $stmt_insert_os = $conn->prepare($insert_os);
+
+            //   if ($stmt_insert_os === false) {
+            //     $conn->rollback();
+            //      header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_movimentacao");
+            //       exit;
+            //       }
+            $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $os, $origem, $id);
+            $stmt_insert_os->execute();
+
+            //  if (!$stmt_insert_os->execute()) {
+            //       $conn->rollback();
+            //         header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
+            //       exit;
+            //     }
+
+            $conn->commit();
+
+            header("Location: ver_ordem.php?id=$id&sucesso=cadastro_efetuado");
             exit;
-        }
-        $soma = $stmt_soma_os->get_result();
-        $soma_os = $soma->fetch_assoc();
+        } catch (mysqli_sql_exception $erro) {
 
-        $os = $soma_os['total'] ?? 0;
-
-
-        $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES (?, ?, ?, ?, ?)";
-
-        $stmt_insert_os = $conn->prepare($insert_os);
-        $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $os, $origem, $id);
-
-        if (!$stmt_insert_os->execute()) {
+            $conn->rollback();
             header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
             exit;
         }
-
-        header("Location: ver_ordem.php?id=$id&sucesso=cadastro_efetuado");
-        exit;
     }
 
 
@@ -197,7 +246,7 @@ if (isset($_GET['id'])) {
         }
         $sql_cancelar = "UPDATE ordens_servico 
                          SET status = 'cancelada'
-                         WHERE id = $id";
+                         WHERE id = ?";
 
         $stmt_cancelar_os = $conn->prepare($sql_cancelar);
         $stmt_cancelar_os->bind_param("i", $id);
