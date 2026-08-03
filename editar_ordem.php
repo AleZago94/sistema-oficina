@@ -7,7 +7,7 @@ if (!isset($_GET['id'])) {
     header("location: ordens.php?erro=ordem_nao_encontrada");
     exit;
 }
-$id = $_GET['id'];
+$id = intval($_GET['id']);
 
 $sql_ordem = "SELECT  
     os.id,
@@ -69,7 +69,7 @@ $result_servicos = $conn->query($servicos);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = intval($_POST['id']);
     $cliente_id = trim($_POST['cliente_id']);
-    $modelo_moto = trim($_POST['modelo_moto']);
+    //$modelo_moto = trim($_POST['modelo_moto']);
     $problema_relatado = trim($_POST['problema_relatado']);
     $valor_mao_obra = floatval($_POST['valor_mao_obra']);
     $valor_pecas = floatval($_POST['valor_pecas']);
@@ -127,31 +127,31 @@ include "includes/sidebar.php";
         <div class="conatainer-fluid">
 
             <form action="" method="POST">
-                <input type="hidden" name="id" value="<?php echo $result['id']; ?>">
+                <input type="hidden" name="id" value="<?php echo intval($result['id']); ?>">
                 <div class="mb-3">
                     <label for="cliente_id" class="form-label">cliente</label>
-                    <input type="text" name="cliente_id" id="cliente_id" value="<?php echo $result['nome_cliente']; ?>" class="form-control"> <br>
+                    <input type="text" name="cliente_id" id="cliente_id" value="<?php echo htmlspecialchars($result['nome_cliente'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control"> <br>
                 </div>
 
                 <div class="mb-3">
-                    <label for="modelo_moto" class="form-label">modelo da moto <?php echo $result['modelo_moto']; ?> </label>
+                    <label for="modelo_moto" class="form-label">modelo da moto <?php echo  htmlspecialchars($result['modelo_moto'], ENT_QUOTES, 'UTF-8'); ?> </label>
                     <!-- <input type="text" name="modelo_moto" id="modelo_moto" value=""> -->
                 </div>
 
                 <div class="mb-3">
                     <label for="problema_relatada" class="form-label"> problema relatado </label>
-                    <input type="text" name="problema_relatado" id="problema_relatado" value="<?php echo $result['problema_relatado']; ?>">
+                    <input type="text" name="problema_relatado" id="problema_relatado" value="<?php echo htmlspecialchars($result['problema_relatado'], ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
 
                 <div class="mb-3">
                     <label for="valor_mao_obra" class="form-label"> valor mao da mao de obra </label>
-                    <input type="number" step="0.01" name="valor_mao_obra" id="valor_mao_obra" value="<?php echo $result['valor_mao_obra']; ?>" class="form-control">
+                    <input type="number" step="0.01" name="valor_mao_obra" id="valor_mao_obra" value="<?php echo htmlspecialchars($result['valor_mao_obra'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 </div>
 
                 <div class="mb-3">
                     <label for="valor_pecas" class="form-label"> valor das pecas </label>
-                    <input type="number" step="0.01" name="valor_pecas" id="valor_pecas" value="<?php echo $result['valor_pecas']; ?>" class="form-control">
+                    <input type="number" step="0.01" name="valor_pecas" id="valor_pecas" value="<?php echo    htmlspecialchars($result['valor_pecas'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
                 </div>
 
                 <div class="mb-3">
@@ -174,13 +174,13 @@ include "includes/sidebar.php";
                             type="checkbox"
                             name="servicos[]"
                             <?php if (in_array($servico['id'], $servicos_marcados)) echo "checked"; ?>
-                            value="<?php echo $servico['id']; ?>"
-                            id="servico_<?php echo $servico['id']; ?>">
+                            value="<?php echo intval($servico['id']); ?>"
+                            id="servico_<?php echo intval($servico['id']); ?>">
                         <label
                             class="form-check-label"
-                            for="servico_<?php echo $servico['id']; ?>">
+                            for="servico_<?php echo intval($servico['id']); ?>">
 
-                            <?php echo $servico['nome']; ?>
+                            <?php echo    htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
                             -
                             R$ <?php echo number_format($servico['valor'], 2, ',', '.'); ?>
 

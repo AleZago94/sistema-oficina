@@ -32,6 +32,10 @@ if (isset($_GET["erro"])) {
         case "falha_no_cadastro":
             echo "<script>alert('falha ao cadastrar moto tente novamente')</script>";
             break;
+
+        case "erro_edicao_moto":
+            echo "<script>alert('erro ao editar moto')</script>";
+            break;
     }
 }
 
@@ -41,6 +45,10 @@ if (isset($_GET["sucesso"])) {
 
         case "moto_cadastrada":
             echo "<script>alert('moto cadastrada com sucesso')</script>";
+            break;
+
+        case "moto_atualizada";
+            echo "<script>alert('moto atualizada com sucesso')</script>";
             break;
     }
 }

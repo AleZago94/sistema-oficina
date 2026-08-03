@@ -118,8 +118,8 @@ include "includes/sidebar.php";
                 <select name="cliente_id" id="cliente_id" class="form-control">
                     <option value="">Selecione o cliente</option>
                     <?php while ($cliente = $result_clientes->fetch_assoc()): ?>
-                        <option value="<?php echo $cliente['id']; ?>">
-                            <?php echo $cliente['nome']; ?>
+                        <option value="<?php echo intval($cliente['id']); ?>">
+                            <?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>
                         </option>
                     <?php endwhile; ?>
                 </select>
@@ -129,11 +129,11 @@ include "includes/sidebar.php";
                     <option value="">selecione a moto</option>
                     <?php while ($moto = $result_motos->fetch_assoc()): ?>
                         <option
-                            value="<?php echo $moto['id']; ?>"
-                            data-cliente="<?php echo $moto['cliente_id']; ?>">
-                            <?php echo $moto['marca']; ?>
-                            <?php echo $moto['modelo']; ?> -
-                            <?php echo $moto['placa']; ?>
+                            value="<?php echo intval($moto['id']); ?>"
+                            data-cliente="<?php echo intval($moto['cliente_id']); ?>">
+                            <?php echo htmlspecialchars($moto['marca'], ENT_QUOTES, 'UTF-8'); ?>
+                            <?php echo htmlspecialchars($moto['modelo'], ENT_QUOTES, 'UTF-8'); ?> -
+                            <?php echo htmlspecialchars($moto['placa'], ENT_QUOTES, 'UTF-8'); ?>
                         </option>
                     <?php endwhile; ?>
                 </select>
@@ -149,14 +149,14 @@ include "includes/sidebar.php";
                             class="form-check-input"
                             type="checkbox"
                             name="servicos[]"
-                            value="<?php echo $servico['id']; ?>"
-                            id="servico_<?php echo $servico['id']; ?>">
+                            value="<?php echo intval($servico['id']); ?>"
+                            id="servico_<?php echo intval($servico['id']); ?>">
 
                         <label
                             class="form-check-label"
-                            for="servico_<?php echo $servico['id']; ?>">
+                            for="servico_<?php echo intval($servico['id']); ?>">
 
-                            <?php echo $servico['nome']; ?>
+                            <?php echo htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
                             -
                             R$ <?php echo number_format($servico['valor'], 2, ',', '.'); ?>
 

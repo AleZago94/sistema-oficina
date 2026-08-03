@@ -3,24 +3,28 @@ require_once 'includes/autenticacao.php';
 require_once 'config/conexao.php';
 
 if (isset($_GET["erro"])) {
-    if ($_GET["erro"] == "cliente_nao_encontrado") {
-        echo "<script>alert('ERRO AO EDITAR CLIENTE'); </script>";
-    }
 
-    if ($_GET["erro"] == "erro_ao_excluir") {
-        echo "<script>alert('nao foi possivel excluir o cliente')</script>";
-    }
+    switch ($_GET["erro"]) {
 
-    if ($_GET["erro"] == "id_invalido") {
-        echo "<script>alert('id invalido')</script>";
-    }
+        case "cliente_nao_encontrado":
+            echo "<script>alert('ERRO AO EDITAR CLIENTE'); </script>";
+            break;
 
+        case "erro_ao_excluir":
+            echo "<script>alert('nao foi possivel excluir o cliente')</script>";
+            break;
 
-    if ($_GET["erro"] == "id_inexistente") {
-        echo "<script>alert('nao foi possivel encontrar  este id');</script>";
-    }
-    if ($_GET["erro"] == "id_nao_encontrado") {
-        echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
+        case  "id_invalido":
+            echo "<script>alert('id invalido')</script>";
+            break;
+
+        case "id_inexistente":
+            echo "<script>alert('nao foi possivel encontrar  este id');</script>";
+            break;
+
+        case "id_nao_encontrado":
+            echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
+            break;
     }
 }
 
@@ -132,11 +136,11 @@ include 'includes/sidebar.php';
 
                             <tr>
 
-                                <td><?php echo $cliente['nome']; ?></td>
+                                <td><?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
 
-                                <td><?php echo $cliente['telefone']; ?></td>
+                                <td><?php echo htmlspecialchars($cliente['telefone'], ENT_QUOTES, 'UTF-8'); ?></td>
 
-                                <td><?php echo $cliente['cpf']; ?></td>
+                                <td><?php echo htmlspecialchars($cliente['cpf'], ENT_QUOTES, 'UTF-8'); ?></td>
 
 
                                 <td>
@@ -148,7 +152,7 @@ include 'includes/sidebar.php';
                                     </a>
 
                                     <a
-                                        href="excluir_cliente.php?id=<?php echo $cliente['id']; ?>"
+                                        href="excluir_cliente.php?id=<?php echo intval($cliente['id']); ?>"
                                         class="btn btn-danger btn-sm"
                                         onclick="return confirm('Deseja excluir este cliente?')">
                                         Excluir

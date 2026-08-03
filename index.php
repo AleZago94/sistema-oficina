@@ -56,7 +56,7 @@ $result_ultimas_os = $conn->query($sql_ultimas_os);
         <div class="col-lg-3 col-6">
           <div class="small-box text-bg-primary">
             <div class="inner">
-              <h3><?php echo $total_clientes; ?></h3>
+              <h3><?php echo intval($total_clientes); ?></h3>
               <p>Clientes</p>
             </div>
             <a href="clientes.php" class="small-box-footer">Ver clientes</a>
@@ -66,7 +66,7 @@ $result_ultimas_os = $conn->query($sql_ultimas_os);
         <div class="col-lg-3 col-6">
           <div class="small-box text-bg-success">
             <div class="inner">
-              <h3><?php echo $total_moto; ?></h3>
+              <h3><?php echo intval($total_moto); ?></h3>
               <p>Motos</p>
             </div>
             <a href="motos.php" class="small-box-footer">Ver motos</a>
@@ -76,7 +76,7 @@ $result_ultimas_os = $conn->query($sql_ultimas_os);
         <div class="col-lg-3 col-6">
           <div class="small-box text-bg-warning">
             <div class="inner">
-              <h3><?php echo $total_servicos; ?></h3>
+              <h3><?php echo intval($total_servicos); ?></h3>
               <p>Serviços</p>
             </div>
             <a href="servicos.php" class="small-box-footer">Ver serviços</a>
@@ -86,7 +86,7 @@ $result_ultimas_os = $conn->query($sql_ultimas_os);
         <div class="col-lg-3 col-6">
           <div class="small-box text-bg-danger">
             <div class="inner">
-              <h3><?php echo $total_os_aberta; ?></h3>
+              <h3><?php echo intval($total_os_aberta); ?></h3>
               <p>OS abertas</p>
             </div>
             <a href="ordens.php" class="small-box-footer">Ver ordens</a>
@@ -118,13 +118,13 @@ $result_ultimas_os = $conn->query($sql_ultimas_os);
                   <tbody>
                     <?php while ($os = $result_ultimas_os->fetch_assoc()): ?>
                       <tr>
-                        <td>#<?php echo $os['id']; ?></td>
-                        <td><?php echo $os['nome_cliente']; ?></td>
-                        <td><?php echo $os['modelo_moto']; ?></td>
-                        <td><?php echo $os['placa']; ?></td>
-                        <td><?php echo $os['status']; ?></td>
-                        <td> <a href="ver_ordem.php?id=<?php echo $os['id']; ?>" class="btn btn-primary btn-sm">Ver</a></td>
-                        <td><a href="editar_ordem.php?id=<?php echo $os['id']; ?>" class="btn btn-primary btn-sm">Editar</a></td>
+                        <td>#<?php echo intval($os['id']); ?></td>
+                        <td><?php echo htmlspecialchars($os['nome_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($os['modelo_moto'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($os['placa'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($os['status'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td> <a href="ver_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm">Ver</a></td>
+                        <td><a href="editar_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm">Editar</a></td>
                       </tr>
                     <?php endwhile; ?>
                   </tbody>
@@ -143,10 +143,10 @@ $result_ultimas_os = $conn->query($sql_ultimas_os);
             </div>
 
             <div class="card-body">
-              <p>Abertas: <?php echo $total_os_aberta; ?></p>
-              <p>Em andamento: <?php echo $total_os_andamento; ?></p>
-              <p>Concluídas: <?php echo $total_os_concluidas; ?></p>
-              <p>caceladas: <?php echo $total_canceladas; ?></p>
+              <p>Abertas: <?php echo intval($total_os_aberta); ?></p>
+              <p>Em andamento: <?php echo intval($total_os_andamento); ?></p>
+              <p>Concluídas: <?php echo intval($total_os_concluidas); ?></p>
+              <p>caceladas: <?php echo intval($total_canceladas); ?></p>
             </div>
           </div>
         </div>

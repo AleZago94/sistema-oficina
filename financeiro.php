@@ -21,7 +21,7 @@ if (isset($_GET["erro"])) {
 if (isset($_GET["sucesso"])) {
 
     switch ($_GET["sucesso"]) {
-        
+
         case "movimentacao_salva":
             echo "<script>alert('movimentacao cadastrada com sucesso');</script>";
             break;
@@ -196,9 +196,9 @@ include "includes/sidebar.php";
                             <tbody>
                                 <?php while ($lista = $listar->fetch_assoc()): ?>
                                     <tr>
-                                        <td><?php echo $lista['id']; ?></td>
-                                        <td><?php echo $lista['tipo']; ?></td>
-                                        <td><?php echo $lista['descricao']; ?></td>
+                                        <td><?php echo intval($lista['id']); ?></td>
+                                        <td><?php echo htmlspecialchars($lista['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td><?php echo htmlspecialchars($lista['descricao'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo number_format($lista['valor'], 2, ',', '.'); ?></td>
                                         <td><?php echo $lista['created_at']; ?></td>
                                     </tr>

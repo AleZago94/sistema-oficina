@@ -20,11 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("sssii", $marca, $modelo, $placa, $ano, $id);
 
     if (!$stmt->execute()) {
-        echo "erro na edicao";
+        header("location: motos.php?erro=erro_edicao_moto");
         exit;
     }
 
-    header("location: motos.php");
+    header("location: motos.php?sucesso=moto_atualizada");
     exit;
 }
 if (!isset($_GET["id"])) {
@@ -58,19 +58,19 @@ include "includes/sidebar.php";
         <div class="container-fluid">
             <form action="" method="POST">
 
-                <input type="hidden" name="id" value="<?php echo $motos['id']; ?>">
+                <input type="hidden" name="id" value="<?php echo intval($motos['id']); ?>">
 
                 <label for="marca" class="form-label">marca</label>
-                <input type="text" name="marca" id="marca" value="<?php echo $motos['marca']; ?>" class="form-control">
+                <input type="text" name="marca" id="marca" value="<?php echo htmlspecialchars($motos['marca'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 <label for="modelo" class="form-label">modelo</label>
-                <input type="text" name="modelo" id="modelo" value="<?php echo $motos['modelo']; ?>" class="form-control">
+                <input type="text" name="modelo" id="modelo" value="<?php echo htmlspecialchars($motos['modelo'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 <label for="placa" class="form-label">placa</label>
-                <input type="text" name="placa" id="placa" value="<?php echo $motos['placa']; ?>" class="form-control">
+                <input type="text" name="placa" id="placa" value="<?php echo htmlspecialchars($motos['placa'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 <label for="ano" class="form-label">ano de fabricacao</label>
-                <input type="text" name="ano" id="ano" value="<?php echo $motos['ano']; ?>" class="form-control">
+                <input type="text" name="ano" id="ano" value="<?php echo intval($motos['ano']); ?>" class="form-control">
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
 

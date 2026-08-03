@@ -329,15 +329,15 @@ include "includes/sidebar.php";
 
                 <!-- card da OS aqui -->
                 <div class="card-header">
-                    <h3 class="card-title">OS # <?php echo $ordem['id']; ?></h3>
+                    <h3 class="card-title">OS # <?php echo intval($ordem['id']); ?></h3>
                 </div>
                 <div class="card-body">
-                    <p><strong>Cliente</strong> <?php echo $ordem['cliente_nome']; ?></p>
-                    <p><strong>Telefone</strong><?php echo $ordem['telefone']; ?></p>
-                    <p><strong>Moto</strong><?php echo $ordem['modelo_moto']; ?></p>
-                    <p><strong>Placa</strong><?php echo $ordem['placa']; ?></p>
-                    <p><strong>Status</strong><?php echo $ordem['status']; ?></p>
-                    <p><strong>Problema relatado</strong><?php echo $ordem['problema_relatado']; ?></p>
+                    <p><strong>Cliente</strong> <?php echo htmlspecialchars($ordem['cliente_nome'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p><strong>Telefone</strong><?php echo htmlspecialchars($ordem['telefone'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p><strong>Moto</strong><?php echo htmlspecialchars($ordem['modelo_moto'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p><strong>Placa</strong><?php echo htmlspecialchars($ordem['placa'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p><strong>Status</strong><?php echo htmlspecialchars($ordem['status'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p><strong>Problema relatado</strong><?php echo htmlspecialchars($ordem['problema_relatado'], ENT_QUOTES, 'UTF-8'); ?></p>
 
                 </div>
                 <!-- tabela de serviços aqui -->
@@ -358,7 +358,7 @@ include "includes/sidebar.php";
                             <tbody>
                                 <?php while ($item = $result_item->fetch_assoc()): ?>
                                     <tr>
-                                        <td><?php echo $item['os_nome']; ?></td>
+                                        <td><?php echo htmlspecialchars($item['os_nome'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td>R$ <?php echo number_format($item['valor'], 2, ',', '.'); ?></td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -368,20 +368,20 @@ include "includes/sidebar.php";
                 </div>
                 <!-- botão imprimir aqui -->
                 <a
-                    href="imprimir_os.php?id=<?php echo $ordem['id']; ?>"
+                    href="imprimir_os.php?id=<?php echo intval($ordem['id']); ?>"
                     target="_blank"
                     class="btn btn-secondary">
                     Imprimir Comanda
                 </a>
                 <?php if ($ordem['status'] != 'concluida' && $ordem['status'] != 'cancelada'):  ?>
                     <a
-                        href="ver_ordem.php?id=<?php echo $ordem['id']; ?>&concluir=1" class="btn btn-success" onclick="return confirm('Deseja concluir esta OS?')">
+                        href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>&concluir=1" class="btn btn-success" onclick="return confirm('Deseja concluir esta OS?')">
                         Concluir OS
                     </a>
                 <?php endif ?>
 
                 <?php if ($ordem['status'] != 'cancelada' && $ordem['status'] == 'aberta'): ?>
-                    <a href="ver_ordem.php?id=<?php echo $ordem['id']; ?>&cancelar=1" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> cancelar OS </a>
+                    <a href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>&cancelar=1" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> cancelar OS </a>
                 <?php endif ?>
 
             <?php else: ?>

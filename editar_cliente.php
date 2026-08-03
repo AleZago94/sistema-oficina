@@ -64,16 +64,16 @@ include "includes/sidebar.php";
     <div class="app-content">
         <div class="container-fluid">
             <form action="" method="POST">
-                <input type="hidden" name="id" value="<?php echo $cliente['id']; ?>">
+                <input type="hidden" name="id" value="<?php echo intval($cliente['id']); ?>">
 
                 <label for="nome" class="form-label">Nome</label>
-                <input type="text" name="nome" id="nome" value="<?php echo $cliente['nome']; ?>" class="form-control">
+                <input type="text" name="nome" id="nome" value="<?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 <label for="telefone" class="form-label">telefone:</label>
-                <input type="text" name="telefone" id="telefone" value="<?php echo $cliente['telefone']; ?>" class="form-control">
+                <input type="text" name="telefone" id="telefone" value="<?php echo htmlspecialchars($cliente['telefone'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 <label for="cpf" class="form-label">CPF</label>
-                <input type="text" name="cpf" id="cpf" value="<?php echo $cliente['cpf']; ?>" class="form-control">
+                <input type="text" name="cpf" id="cpf" value="<?php echo htmlspecialchars($cliente['cpf'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar Alteraçao</button>
 

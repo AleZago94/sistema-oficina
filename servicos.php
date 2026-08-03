@@ -96,7 +96,7 @@ $result = $conn->query($sql);
                     <tbody>
                         <?php while ($result_servico = $result->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $result_servico['nome']; ?> </td>
+                                <td><?php echo htmlspecialchars($result_servico['nome'], ENT_QUOTES, 'UTF-8'); ?> </td>
                                 <td>R$ <?php echo number_format($result_servico['valor'], 2, ',', '.'); ?></td>
                             </tr>
                         <?php endwhile ?>
