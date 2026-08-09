@@ -54,6 +54,14 @@ if (isset($_GET["erro"])) {
         case "falha_ao_preparar_movimentacao":
             echo "<script>alert('falha na movimentacao tente novamente ou contate ADM')</script>";
             break;
+
+        case "id_nao_encontrado":
+            echo "<script>alert('erro ao obter ID')</script>";
+            break;
+
+        case "id_invalido":
+            echo "<script>alert('ID invalido')</script>";
+            break;
     }
 }
 
@@ -79,189 +87,204 @@ $origem = 'os';
 
 
 
-if (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
+if (!isset($_GET['id'])) {
+    header("location: ordens.php?erro=id_nao_encontrado");
+    exit;
+}
 
-    if (isset($_GET['concluir'])) {
+$id = intval($_GET['id']);
 
-        $concluir_status = "SELECT status
+if ($id <= 0) {
+    header("location: ordens.php?erro=id_invalido");
+    exit;
+}
+
+
+if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
+
+
+
+    // if (isset($_GET['concluir'])) {
+
+    $concluir_status = "SELECT status
                             FROM ordens_servico
                             WHERE id = ?";
 
-        $stmt_concluir = $conn->prepare($concluir_status);
-        $stmt_concluir->bind_param("i", $id);
+    $stmt_concluir = $conn->prepare($concluir_status);
+    $stmt_concluir->bind_param("i", $id);
 
-        if (!$stmt_concluir->execute()) {
-            header("location: ver_ordem.php?id=$id&erro=falha_obter_status");
-            exit;
-        }
-        $result_concluir = $stmt_concluir->get_result();
-        $status_concluir = $result_concluir->fetch_assoc();
+    if (!$stmt_concluir->execute()) {
+        header("location: ver_ordem.php?id=$id&erro=falha_obter_status");
+        exit;
+    }
+    $result_concluir = $stmt_concluir->get_result();
+    $status_concluir = $result_concluir->fetch_assoc();
 
-        if (!$status_concluir) {
-            header("location: ver_ordem.php?id=$id&erro=ordem_nao_encontrada");
-            exit;
-        }
+    if (!$status_concluir) {
+        header("location: ver_ordem.php?id=$id&erro=ordem_nao_encontrada");
+        exit;
+    }
 
-        $status_concluir = $status_concluir['status'];
+    $status_concluir = $status_concluir['status'];
 
-        if ($status_concluir !== 'aberta' && $status_concluir !== 'em_andamento') {
-            header("location: ver_ordem.php?id=$id&erro=OS_concluida");
-            exit;
-        }
+    if ($status_concluir !== 'aberta' && $status_concluir !== 'em_andamento') {
+        header("location: ver_ordem.php?id=$id&erro=OS_concluida");
+        exit;
+    }
 
-        $sql_movimentacao = "SELECT id
+    $sql_movimentacao = "SELECT id
                   FROM movimentacoes_financeiras 
                   WHERE origem = 'os'
                   AND ordem_id = ?";
 
-        $stmt_movimentacao = $conn->prepare($sql_movimentacao);
-        $stmt_movimentacao->bind_param("i", $id);
+    $stmt_movimentacao = $conn->prepare($sql_movimentacao);
+    $stmt_movimentacao->bind_param("i", $id);
 
-        if (!$stmt_movimentacao->execute()) {
-            header("location: ver_ordem.php?id=$id&erro=falha_verificar_movimentacao");
-            exit;
-        }
+    if (!$stmt_movimentacao->execute()) {
+        header("location: ver_ordem.php?id=$id&erro=falha_verificar_movimentacao");
+        exit;
+    }
 
-        $result_movimentacao = $stmt_movimentacao->get_result();
+    $result_movimentacao = $stmt_movimentacao->get_result();
 
-        if ($result_movimentacao->num_rows > 0) {
-            header("location: ver_ordem.php?id=$id&erro=movimentacao_ja_existe");
-            exit;
-        }
+    if ($result_movimentacao->num_rows > 0) {
+        header("location: ver_ordem.php?id=$id&erro=movimentacao_ja_existe");
+        exit;
+    }
 
 
-        $descricao = "OS #$id";
+    $descricao = "OS #$id";
 
-        try {
-            $conn->begin_transaction();
+    try {
+        $conn->begin_transaction();
 
-            $sql_update = "UPDATE ordens_servico 
+        $sql_update = "UPDATE ordens_servico 
                        SET status = 'concluida'
                        WHERE id = ?";
-            $stmt_update = $conn->prepare($sql_update);
+        $stmt_update = $conn->prepare($sql_update);
 
-            //   if ($stmt_update === false) {
-            //     $conn->rollback();
-            //   header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_atualizacao");
-            // exit;
-            // }
+        //   if ($stmt_update === false) {
+        //     $conn->rollback();
+        //   header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_atualizacao");
+        // exit;
+        // }
 
-            $stmt_update->bind_param("i", $id);
-            $stmt_update->execute();
+        $stmt_update->bind_param("i", $id);
+        $stmt_update->execute();
 
-            //if (!$stmt_update->execute()) {
-            //    $conn->rollback();
-            //      header("location: ver_ordem.php?id=$id&erro=falha_update");
-            //      exit;
-            //    }
+        //if (!$stmt_update->execute()) {
+        //    $conn->rollback();
+        //      header("location: ver_ordem.php?id=$id&erro=falha_update");
+        //      exit;
+        //    }
 
 
-            $sql_soma_os = " SELECT SUM(s.valor) AS total
+        $sql_soma_os = " SELECT SUM(s.valor) AS total
         FROM ordem_servicos_itens osi
         JOIN servicos s ON osi.servico_id = s.id
         JOIN ordens_servico os ON osi.ordem_servico_id = os.id
         WHERE os.id = ? ";
 
-            $stmt_soma_os = $conn->prepare($sql_soma_os);
+        $stmt_soma_os = $conn->prepare($sql_soma_os);
 
-            //  if ($stmt_soma_os === false) {
-            //       $conn->rollback();
-            //     header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_soma");
-            //         exit;
-            //    }
-            $stmt_soma_os->bind_param("i", $id);
-            $stmt_soma_os->execute();
+        //  if ($stmt_soma_os === false) {
+        //       $conn->rollback();
+        //     header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_soma");
+        //         exit;
+        //    }
+        $stmt_soma_os->bind_param("i", $id);
+        $stmt_soma_os->execute();
 
-            // if (!$stmt_soma_os->execute()) {
-            //     $conn->rollback();
-            //     header("location: ver_ordem.php?id=$id&erro=falha_ao_calcular");
-            //     exit;
-            // }
-            $soma = $stmt_soma_os->get_result();
-            $soma_os = $soma->fetch_assoc();
+        // if (!$stmt_soma_os->execute()) {
+        //     $conn->rollback();
+        //     header("location: ver_ordem.php?id=$id&erro=falha_ao_calcular");
+        //     exit;
+        // }
+        $soma = $stmt_soma_os->get_result();
+        $soma_os = $soma->fetch_assoc();
 
-            $os = $soma_os['total'] ?? 0;
+        $os = $soma_os['total'] ?? 0;
 
 
-            $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES (?, ?, ?, ?, ?)";
+        $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES (?, ?, ?, ?, ?)";
 
-            $stmt_insert_os = $conn->prepare($insert_os);
+        $stmt_insert_os = $conn->prepare($insert_os);
 
-            //   if ($stmt_insert_os === false) {
-            //     $conn->rollback();
-            //      header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_movimentacao");
-            //       exit;
-            //       }
-            $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $os, $origem, $id);
-            $stmt_insert_os->execute();
+        //   if ($stmt_insert_os === false) {
+        //     $conn->rollback();
+        //      header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_movimentacao");
+        //       exit;
+        //       }
+        $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $os, $origem, $id);
+        $stmt_insert_os->execute();
 
-            //  if (!$stmt_insert_os->execute()) {
-            //       $conn->rollback();
-            //         header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
-            //       exit;
-            //     }
+        //  if (!$stmt_insert_os->execute()) {
+        //       $conn->rollback();
+        //         header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
+        //       exit;
+        //     }
 
-            $conn->commit();
+        $conn->commit();
 
-            header("Location: ver_ordem.php?id=$id&sucesso=cadastro_efetuado");
-            exit;
-        } catch (mysqli_sql_exception $erro) {
+        header("Location: ver_ordem.php?id=$id&sucesso=cadastro_efetuado");
+        exit;
+    } catch (mysqli_sql_exception $erro) {
 
-            $conn->rollback();
-            header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
-            exit;
-        }
+        $conn->rollback();
+        header("location: ver_ordem.php?id=$id&erro=falha_inserir_movimentacao");
+        exit;
     }
+    //}
+}
 
+// if (isset($_GET['cancelar'])) 
+if (isset($_POST['cancelar']) && $_POST['cancelar'] === '1') {
 
-    if (isset($_GET['cancelar'])) {
-
-        $cancela_status = "SELECT status
+    $cancela_status = "SELECT status
                            FROM ordens_servico
                            WHERE id = ?";
 
-        $stmt_cancela_status = $conn->prepare($cancela_status);
-        $stmt_cancela_status->bind_param("i", $id);
+    $stmt_cancela_status = $conn->prepare($cancela_status);
+    $stmt_cancela_status->bind_param("i", $id);
 
-        if (!$stmt_cancela_status->execute()) {
-            header("location: ver_ordem.php?id=$id&erro=falha_obter_status");
-            exit;
-        }
+    if (!$stmt_cancela_status->execute()) {
+        header("location: ver_ordem.php?id=$id&erro=falha_obter_status");
+        exit;
+    }
 
-        $result_status = $stmt_cancela_status->get_result();
+    $result_status = $stmt_cancela_status->get_result();
 
-        if ($result_status->num_rows <= 0) {
-            header("location: ver_ordem.php?id=$id&erro=ordem_nao_encontrada");
-            exit;
-        }
+    if ($result_status->num_rows <= 0) {
+        header("location: ver_ordem.php?id=$id&erro=ordem_nao_encontrada");
+        exit;
+    }
 
-        $status_cancelar = $result_status->fetch_assoc();
-        $status_os = $status_cancelar['status'];
+    $status_cancelar = $result_status->fetch_assoc();
+    $status_os = $status_cancelar['status'];
 
-        if ($status_os !== 'aberta' && $status_os !== 'em_andamento') {
+    if ($status_os !== 'aberta' && $status_os !== 'em_andamento') {
 
-            header("location: ver_ordem.php?id=$id&erro=falha_cancelar_OS");
-            exit;
-        }
-        $sql_cancelar = "UPDATE ordens_servico 
+        header("location: ver_ordem.php?id=$id&erro=falha_cancelar_OS");
+        exit;
+    }
+    $sql_cancelar = "UPDATE ordens_servico 
                          SET status = 'cancelada'
                          WHERE id = ?";
 
-        $stmt_cancelar_os = $conn->prepare($sql_cancelar);
-        $stmt_cancelar_os->bind_param("i", $id);
+    $stmt_cancelar_os = $conn->prepare($sql_cancelar);
+    $stmt_cancelar_os->bind_param("i", $id);
 
-        if (!$stmt_cancelar_os->execute()) {
-            header("location: ver_ordem.php?id=$id&erro=falha_cancelar_os");
-            exit;
-        }
-
-        header("Location: ver_ordem.php?id=$id&sucesso=ordem_cancelada");
+    if (!$stmt_cancelar_os->execute()) {
+        header("location: ver_ordem.php?id=$id&erro=falha_cancelar_os");
         exit;
-    } //else {
-    //echo "nao é possivel cancelar os ja cancelada";
-    // }
-}
+    }
+
+    header("Location: ver_ordem.php?id=$id&sucesso=ordem_cancelada");
+    exit;
+} //else {
+//echo "nao é possivel cancelar os ja cancelada";
+// }
+
 
 
 
@@ -292,7 +315,7 @@ if (!$stmt_buscar_os->execute()) {
 $result = $stmt_buscar_os->get_result();
 
 if ($result->num_rows <= 0) {
-    header("location: ver_ordem.php?id=$id&erro=falha_obter_dados");
+    header("location: ordens.php?id=$id&erro=falha_obter_dados");
     exit;
 }
 
@@ -374,14 +397,23 @@ include "includes/sidebar.php";
                     Imprimir Comanda
                 </a>
                 <?php if ($ordem['status'] != 'concluida' && $ordem['status'] != 'cancelada'):  ?>
-                    <a
+                    <!-- <a
                         href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>&concluir=1" class="btn btn-success" onclick="return confirm('Deseja concluir esta OS?')">
                         Concluir OS
-                    </a>
+                    </a> -->
+                    <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
+                        <input type="hidden" name="concluir" value="1">
+                        <button class="btn btn-success" onclick="return confirm('Deseja concluir esta OS')">Concluir OS</button>
+
+                    </form>
                 <?php endif ?>
 
                 <?php if ($ordem['status'] != 'cancelada' && $ordem['status'] == 'aberta'): ?>
-                    <a href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>&cancelar=1" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> cancelar OS </a>
+
+                    <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
+                        <input type="hidden" name="cancelar" value="1">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> Cancelar OS</button>
+                    </form>
                 <?php endif ?>
 
             <?php else: ?>
