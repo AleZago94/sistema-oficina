@@ -25,6 +25,20 @@ if (isset($_GET["erro"])) {
         case "id_nao_encontrado":
             echo "<script>alert('nao foi possivel encontrar moto com este id');</script>";
             break;
+
+        case "falha_ao_cadastrar":
+            echo "<script>alert('falha ao cadastrar cliente')</script>";
+            break;
+    }
+}
+
+if (isset($_GET['sucesso'])) {
+
+    switch ($_GET['sucesso']) {
+
+        case "cliente_cadastrado":
+            echo "<script>alert('Cliente Cadastrado com sucesso')</script>";
+            break;
     }
 }
 
@@ -42,30 +56,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    $sql = "INSERT INTO clientes (nome, telefone, cpf) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $nome, $telefone, $cpf);
+    try {
+        $conn->begin_transaction();
 
-    if (!$stmt->execute()) {
-        echo "erro ao cadastrar cliente ";
+        $sql = "INSERT INTO clientes (nome, telefone, cpf) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sss", $nome, $telefone, $cpf);
+        $stmt->execute();
+
+
+
+        $cliente_id = $conn->insert_id;
+
+        $sql_moto = "INSERT INTO motos (cliente_id, modelo, placa) VALUES(?, ?, ?)";
+        $stmt = $conn->prepare($sql_moto);
+        $stmt->bind_param("iss", $cliente_id, $modelo, $placa);
+        $stmt->execute();
+
+        //  $conn->query($sql_moto);
+        $conn->commit();
+
+        header("location: clientes.php?sucesso=cliente_cadastrado");
+        exit;
+    } catch (mysqli_sql_exception $erro) {
+        $conn->rollback();
+
+        header("location: clientes.php?erro=falha_ao_cadastrar");
         exit;
     }
-
-    $cliente_id = $conn->insert_id;
-
-    $sql_moto = "INSERT INTO motos (cliente_id, modelo, placa) VALUES(?, ?, ?)";
-    $stmt = $conn->prepare($sql_moto);
-    $stmt->bind_param("iss", $cliente_id, $modelo, $placa);
-
-    //  $conn->query($sql_moto);
-
-
-    if (!$stmt->execute()) {
-        echo "erro ao cadastrar moto";
-        exit;
-    }
-
-    echo "<script>alert('Cliente cadastrado com sucesso');</script>";
 }
 $sql_cliente = "SELECT * FROM clientes";
 $result_cliente = $conn->query($sql_cliente);
