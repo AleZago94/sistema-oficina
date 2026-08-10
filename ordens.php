@@ -5,34 +5,36 @@ require_once "config/conexao.php";
 
 if (isset($_GET["erro"])) {
 
-switch ($_GET["erro"]){
+    switch ($_GET["erro"]) {
 
-    case "ordem_nao_encontrada":
-         echo "<script>alert('nao foi possivel encontrar a ordem')</script>";
-         break;
+        case "ordem_nao_encontrada":
+            echo "<script>alert('nao foi possivel encontrar a ordem')</script>";
+            break;
 
-    case "servicos_nao_encontrados":
-         echo "<script>alert('nao foi possivel encontrar os servicos')</script>";
-         break;
+        case "servicos_nao_encontrados":
+            echo "<script>alert('nao foi possivel encontrar os servicos')</script>";
+            break;
 
-    case "falha_atualizar_orden":
-         echo "<script>alert('nao foi possivel fazer a atualizacao da ordem')</script>";
-         break;
+        case "falha_atualizar_orden":
+            echo "<script>alert('nao foi possivel fazer a atualizacao da ordem')</script>";
+            break;
 
-    case "campos_vazios":
-          echo "<script>alert('preencha os dados corretamente')</script>";
-          break;
+        case "campos_vazios":
+            echo "<script>alert('preencha os dados corretamente')</script>";
+            break;
 
-    case "falha_inserir_servicos":
-        echo "<script>alert('erro ao inserir servicos')</script>";
-        break;
+        case "falha_inserir_servicos":
+            echo "<script>alert('erro ao inserir servicos')</script>";
+            break;
 
-    case "falha_no_cadastro_OS":
-        echo "<script>alert('erro ao cadastrar ordem de servico')</script>";
-        break;
+        case "falha_no_cadastro_OS":
+            echo "<script>alert('erro ao cadastrar ordem de servico')</script>";
+            break;
 
-}
- 
+        case "falha_cadastrar_ordem":
+            echo "<script>alert('erro ao cadastrar ordem de servico contate Administrador')</script>";
+            break;
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -44,8 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($cliente_id) || empty($moto_id) || empty($servicos) || empty($status)) {
         header("location: ordens.php?erro=campos_vazios");
-        exit;  
-     } 
+        exit;
+    }
+
+    try {
+        $conn->begin_transaction();
 
         $sql_ordem = "INSERT INTO ordens_servico 
         (cliente_id, moto_id, problema_relatado, status) 
@@ -53,37 +58,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql_ordem);
         $stmt->bind_param("iiss", $cliente_id, $moto_id, $problema_relatado, $status);
-
-        if(!$stmt->execute()){
-            header("location: ordens.php?erro=falha_no_cadastro_OS");
-            exit;
-        }
+        $stmt->execute();
 
         $ordem_id = $conn->insert_id;
 
-     
-       
-         $sql_item = "INSERT INTO ordem_servicos_itens 
+
+
+        $sql_item = "INSERT INTO ordem_servicos_itens
             (ordem_servico_id, servico_id)
             VALUES 
             (?, ?)";
-        
+
         $stmt_item = $conn->prepare($sql_item);
 
         foreach ($servicos as $servico_id) {
             $servico_id = intval($servico_id);
-            
+
             $stmt_item->bind_param("ii", $ordem_id, $servico_id);
-            
-            if(!$stmt_item->execute()){
-                header("location: ordens.php?erro=falha_inserir_servicos");
-                exit;
-            }
+
+            $stmt_item->execute();
         }
+        $conn->commit();
 
         header("Location: ver_ordem.php?id=$ordem_id");
         exit;
-    
+    } catch (mysqli_sql_exception $erro) {
+        $conn->rollback();
+
+        header("location: ordens.php?erro=falha_cadastrar_ordem");
+        exit;
+    }
 }
 
 $sql_servicos = "SELECT * FROM  servicos ORDER BY nome ASC";
