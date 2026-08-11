@@ -103,6 +103,11 @@ if ($id <= 0) {
 if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
 
 
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        echo "token invalido";
+        exit;
+    }
+
 
     // if (isset($_GET['concluir'])) {
 
@@ -240,6 +245,11 @@ if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
 // if (isset($_GET['cancelar'])) 
 if (isset($_POST['cancelar']) && $_POST['cancelar'] === '1') {
 
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        echo "token invalido";
+        exit;
+    }
+
     $cancela_status = "SELECT status
                            FROM ordens_servico
                            WHERE id = ?";
@@ -362,6 +372,7 @@ include "includes/sidebar.php";
                     <p><strong>Status</strong><?php echo htmlspecialchars($ordem['status'], ENT_QUOTES, 'UTF-8'); ?></p>
                     <p><strong>Problema relatado</strong><?php echo htmlspecialchars($ordem['problema_relatado'], ENT_QUOTES, 'UTF-8'); ?></p>
 
+
                 </div>
                 <!-- tabela de serviços aqui -->
                 <div class="card mb-4">
@@ -403,6 +414,7 @@ include "includes/sidebar.php";
                     </a> -->
                     <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
                         <input type="hidden" name="concluir" value="1">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
                         <button class="btn btn-success" onclick="return confirm('Deseja concluir esta OS')">Concluir OS</button>
 
                     </form>
@@ -412,6 +424,8 @@ include "includes/sidebar.php";
 
                     <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
                         <input type="hidden" name="cancelar" value="1">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> Cancelar OS</button>
                     </form>
                 <?php endif ?>
