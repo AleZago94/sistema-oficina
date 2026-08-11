@@ -9,12 +9,12 @@ if (isset($_GET["erro"])) {
 
     switch ($_GET["erro"]) {
 
-        case "falha_na_autenticacao":
-            echo "<script>alert('usuario ou senha estao incorretos')</script>";
-            break;
+       // case "falha_na_autenticacao":
+          //  echo "<script>alert('usuario ou senha estao incorretos')</script>";
+         //   break;
 
-        case "usuario_nao_encontrado":
-            echo "<script>alert('nao existe usuario com este email')</script>";
+        case "usuario_senha_invalido":
+            echo "<script>alert('usuario ou senha invalidos')</script>";
             break;
 
         case "campos_vazios":
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $sql_login = $conn->query($login);
 
     if ($sql_login->num_rows <= 0) {
-        header("location: login.php?erro=usuario_nao_encontrado");
+        header("location: login.php?erro=usuario_senha_invalidos");
         exit;
     }
 
@@ -52,6 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (password_verify($senha, $result_login['senha'])) {
         //senha correta 
+
+        session_regenerate_id(true);
+
         $_SESSION['usuario_id'] = $result_login['id'];
         $_SESSION['usuario_nome'] = $result_login['nome'];
 
@@ -59,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    header("location: login.php?erro=falha_na_autenticacao");
+    header("location: login.php?erro=usuario_senha_invalidos");
     exit;
 }
 

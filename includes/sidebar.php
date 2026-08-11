@@ -271,6 +271,9 @@
             </li>
 
           </ul>
+          <a href="includes/logout.php" class="nav-link">
+            <p>Sair</p>
+          </a>
           <!--end::Sidebar Menu-->
         </nav>
       </div>
