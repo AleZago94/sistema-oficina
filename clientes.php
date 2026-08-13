@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/autenticacao.php';
 require_once 'config/conexao.php';
-
+require_once "includes/helpers.php";
 if (isset($_GET["erro"])) {
 
     switch ($_GET["erro"]) {
@@ -29,6 +29,10 @@ if (isset($_GET["erro"])) {
         case "falha_ao_cadastrar":
             echo "<script>alert('falha ao cadastrar cliente')</script>";
             break;
+
+        case "token_invalido":
+            echo "<script>alert('Requisição inválida. Tente novamente.')</script>";
+            break;
     }
 }
 
@@ -43,6 +47,12 @@ if (isset($_GET['sucesso'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("Location: clientes.php?erro=token_invalido");
+        exit;
+    }
+
     $nome = trim($_POST['nome']);
     $telefone = trim($_POST['telefone']);
     $cpf = trim($_POST['cpf']);
@@ -123,6 +133,8 @@ include 'includes/sidebar.php';
                     <label for="placa" class="form-label">placa</label>
                     <input type="text" name="placa" id="placa" class="form-control">
                 </div>
+
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
 
                 <button type="submit" class="btn btn-primary">Salvar</button>
             </form>

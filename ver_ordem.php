@@ -1,6 +1,7 @@
 <?php
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
 
 if (isset($_GET["erro"])) {
 
@@ -62,6 +63,10 @@ if (isset($_GET["erro"])) {
         case "id_invalido":
             echo "<script>alert('ID invalido')</script>";
             break;
+
+        case "token_invalido":
+            echo "<script>alert('Requisição inválida. Tente novamente.')</script>";
+            break;
     }
 }
 
@@ -103,8 +108,12 @@ if ($id <= 0) {
 if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
 
 
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        echo "token invalido";
+    //  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    //     echo "token invalido";
+    //     exit;
+    //  }
+    if (!validarCsrf()) {
+        header("Location: ver_ordem.php?id=$id&erro=token_invalido");
         exit;
     }
 
@@ -245,8 +254,12 @@ if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
 // if (isset($_GET['cancelar'])) 
 if (isset($_POST['cancelar']) && $_POST['cancelar'] === '1') {
 
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        echo "token invalido";
+    // if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    //     echo "token invalido";
+    //     exit;
+    //  }
+    if (!validarCsrf()) {
+        header("Location: ver_ordem.php?id=$id&erro=token_invalido");
         exit;
     }
 
@@ -414,7 +427,7 @@ include "includes/sidebar.php";
                     </a> -->
                     <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
                         <input type="hidden" name="concluir" value="1">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
                         <button class="btn btn-success" onclick="return confirm('Deseja concluir esta OS')">Concluir OS</button>
 
                     </form>
@@ -424,6 +437,7 @@ include "includes/sidebar.php";
 
                     <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
                         <input type="hidden" name="cancelar" value="1">
+
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
 
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> Cancelar OS</button>
