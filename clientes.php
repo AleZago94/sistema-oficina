@@ -181,12 +181,20 @@ include 'includes/sidebar.php';
                                         Editar
                                     </a>
 
-                                    <a
-                                        href="excluir_cliente.php?id=<?php echo intval($cliente['id']); ?>"
+
+                                    <form action="excluir_cliente.php?id=<?php echo intval($cliente['id']); ?>" method="POST">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Deseja excluir este cliente?')">excluir</button>
+
+                                    </form>
+
+                                    <!--  <a
+                                        href=""
                                         class="btn btn-danger btn-sm"
                                         onclick="return confirm('Deseja excluir este cliente?')">
                                         Excluir
-                                    </a>
+                                    </a>-->
 
                                 </td>
 
