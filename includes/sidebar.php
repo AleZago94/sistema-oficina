@@ -256,6 +256,8 @@
               </a>
             </li>
 
+
+
             <li class="nav-item">
               <a href="financeiro.php" class="nav-link">
                 <i class="nav-icon bi bi-cash-coin"></i>
@@ -270,7 +272,14 @@
               </a>
             </li>
 
+            <li class="nav-item">
+              <a href="servicos.php" class="nav-link">
+                <i class="nav-icon bi bi-clipboard-check"></i>
+                <p>configuracoes</p>
+              </a>
+            </li>
           </ul>
+
           <a href="includes/logout.php" class="nav-link">
             <p>Sair</p>
           </a>

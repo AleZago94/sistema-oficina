@@ -2,6 +2,7 @@
 require_once "includes/autenticacao.php";
 
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
 
 if (!isset($_GET['id'])) {
     header("location: ordens.php?erro=ordem_nao_encontrada");
@@ -67,6 +68,12 @@ $result_servicos = $conn->query($servicos);
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("location: ordens.php?erro=token_invalido");
+        exit;
+    }
+
     $id = intval($_POST['id']);
     $cliente_id = trim($_POST['cliente_id']);
     //$modelo_moto = trim($_POST['modelo_moto']);
@@ -187,6 +194,8 @@ include "includes/sidebar.php";
                         </label>
                     </div>
                 <?php endwhile; ?>
+
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
 
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar edicao </button>

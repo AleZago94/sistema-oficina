@@ -36,6 +36,10 @@ if (isset($_GET["erro"])) {
         case "erro_edicao_moto":
             echo "<script>alert('erro ao editar moto')</script>";
             break;
+
+        case "token_invalido":
+            echo "<script>alert('Requisicao invalida tente novamente')</script>";
+            break;
     }
 }
 

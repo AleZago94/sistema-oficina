@@ -1,9 +1,16 @@
 <?php
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("location: clientes.php?erro=token_invalido");
+        exit;
+    }
+
 
     $id = intval($_POST['id']);
     $nome = trim($_POST['nome']);
@@ -74,6 +81,8 @@ include "includes/sidebar.php";
 
                 <label for="cpf" class="form-label">CPF</label>
                 <input type="text" name="cpf" id="cpf" value="<?php echo htmlspecialchars($cliente['cpf'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
+
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar Alteraçao</button>
 

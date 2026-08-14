@@ -2,6 +2,7 @@
 
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
 
 if (isset($_GET["erro"])) {
 
@@ -34,10 +35,20 @@ if (isset($_GET["erro"])) {
         case "falha_cadastrar_ordem":
             echo "<script>alert('erro ao cadastrar ordem de servico contate Administrador')</script>";
             break;
+
+
+        case "token_invalido":
+            echo "<script>alert('Requisição inválida. Tente novamente.')</script>";
+            break;
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("location: ordens.php?erro=token_invalido");
+        exit;
+    }
     $cliente_id = intval($_POST['cliente_id']);
     $moto_id = intval($_POST['moto_id']);
     $problema_relatado = trim($_POST['problema_relatado']);
@@ -183,6 +194,8 @@ include "includes/sidebar.php";
                     <option value="concluida">concluido</option>
                     <option value="cancelada">cancelada</option>
                 </select>
+
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar OS</button>
 

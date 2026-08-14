@@ -2,8 +2,25 @@
 require_once "includes/autenticacao.php";
 
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
+
+if (isset($_GET['erro'])) {
+
+    switch ($_GET['erro']) {
+        case "campos_vazios":
+            echo "<script>alert('Preencha todos os campos');</script>";
+            break;
+    }
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("location: motos.php?erro=token_invalido");
+        exit;
+    }
+
     $id = intval($_POST['id']);
     $marca = trim($_POST['marca']);
     $modelo = trim($_POST['modelo']);
@@ -11,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $ano = intval($_POST['ano']);
 
     if (empty($marca) || empty($modelo) || empty($placa) || empty($ano)) {
-        echo "<script>alert('Preencha todos os campos');</script>";
+
+        header("location: editar_motos?id=$id&erro=campos_vazios");
         exit;
     }
 
@@ -71,6 +89,8 @@ include "includes/sidebar.php";
 
                 <label for="ano" class="form-label">ano de fabricacao</label>
                 <input type="text" name="ano" id="ano" value="<?php echo intval($motos['ano']); ?>" class="form-control">
+
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
 
                 <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
 

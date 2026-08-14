@@ -1,6 +1,7 @@
 <?php
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
 
 
 if (isset($_GET["erro"])) {
@@ -13,6 +14,10 @@ if (isset($_GET["erro"])) {
 
         case "campos_vazios":
             echo "<script>alert('preecha os campos corretamente')</script>";
+            break;
+
+        case "token_invalido":
+            echo "<script>alert('Requisicao invalida tente novamente')</script>";
             break;
     }
 }
@@ -30,6 +35,12 @@ if (isset($_GET["sucesso"])) {
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("location: financeiro.php?erro=token_invalido");
+        exit;
+    }
+
     //  $id = $_POST['id'];
     $tipo = trim($_POST['tipo']);
     $descricao = trim($_POST['descricao']);
@@ -170,6 +181,8 @@ include "includes/sidebar.php";
                         <label for="valor" name="valor" id="valor" class="form-label">valor da despesa</label>
                         <input type="number" step="0.01" name="valor" id="valor" class="form-control">
                     </div>
+
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
                     <button type="submit" class="btn btn-primary mt-3">salvar </button>
                 </form>
