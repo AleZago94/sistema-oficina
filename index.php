@@ -2,15 +2,16 @@
 require_once "includes/autenticacao.php";
 require_once "config/conexao.php";
 
-include "includes/header.php";
-include "includes/sidebar.php";
+if (isset($_GET['sucesso'])) {
 
-switch ($_GET["sucesso"]) {
+  switch ($_GET["sucesso"]) {
 
-  case "usuario_autenticado":
-    echo "<script>alert('Olá, " . $_SESSION['usuario_nome'] . "! ')</script>";
-    break;
+    case "usuario_autenticado":
+      echo "<script>alert('Olá, " . $_SESSION['usuario_nome'] . "! ')</script>";
+      break;
+  }
 }
+
 
 $sql_clientes = "SELECT COUNT(*) AS total FROM clientes";
 $total_clientes = $conn->query($sql_clientes)->fetch_assoc()['total'];
@@ -46,6 +47,9 @@ ORDER BY os.id DESC
 LIMIT 5";
 
 $result_ultimas_os = $conn->query($sql_ultimas_os);
+include "includes/header.php";
+include "includes/sidebar.php";
+
 ?>
 
 <main class="app-main">

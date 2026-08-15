@@ -37,6 +37,11 @@ if ($ordem->num_rows == 0) {
 }
 $result = $ordem->fetch_assoc();
 
+if ($result['status'] === 'concluida' || $result['status'] === 'cancelada') {
+    header("location: ver_ordem.php?id=$id&erro=ordem_nao_editavel");
+    exit;
+}
+
 
 
 $servicos_existentes = "SELECT servico_id
@@ -83,45 +88,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status = trim($_POST['status']);
     $servicos = $_POST['servicos'] ?? [];
 
+    $status_permitidos = ['aberta', 'em_andamento'];
+
+    if (!in_array($status, $status_permitidos, true)) {
+        header("location: editar_ordem.php?id=$id&erro=status_invalido");
+        exit;
+    }
+
     if (empty($cliente_id)  || empty($problema_relatado)) {
         header("location: editar_ordem.php?erro=campos_vazios");
         exit;
     }
-    $sql_update_ordem = "UPDATE ordens_servico 
+
+    try {
+        $conn->begin_transaction();
+
+        $sql_update_ordem = "UPDATE ordens_servico 
     SET 
     problema_relatado = ?,
     valor_mao_obra = ?,
     valor_pecas = ?,
     status = ?
     WHERE id = ?";
-    $stmt = $conn->prepare($sql_update_ordem);
-    $stmt->bind_param("sddsi", $problema_relatado, $valor_mao_obra, $valor_pecas, $status, $id);
+        $stmt = $conn->prepare($sql_update_ordem);
+        $stmt->bind_param("sddsi", $problema_relatado, $valor_mao_obra, $valor_pecas, $status, $id);
+        $stmt->execute();
 
-    if (!$stmt->execute()) {
-        header("location: ordens.php?erro=falha_atualizar_orden");
-        exit;
-    }
-    // $conn->query($sql_update_ordem);
 
-    $ordem_id = $id;
+        // $conn->query($sql_update_ordem);
 
-    foreach ($servicos as $servico_id) {
-        if (!in_array($servico_id, $servicos_marcados)) {
-            $servico_id = intval($servico_id);
+        $ordem_id = $id;
 
-            $sql_servico = "INSERT INTO ordem_servicos_itens
+        foreach ($servicos as $servico_id) {
+            if (!in_array($servico_id, $servicos_marcados)) {
+                $servico_id = intval($servico_id);
+
+                $sql_servico = "INSERT INTO ordem_servicos_itens
             (ordem_servico_id, servico_id) VALUES ( ? , ? )";
-            $stmt = $conn->prepare($sql_servico);
-            $stmt->bind_param("ii", $ordem_id, $servico_id);
-
-            if (!$stmt->execute()) {
-                header("location: ordens.php?erro=falha_insercao");
-                exit;
+                $stmt = $conn->prepare($sql_servico);
+                $stmt->bind_param("ii", $ordem_id, $servico_id);
+                $stmt->execute();
             }
         }
+        $conn->commit();
+
+        header("Location: ver_ordem.php?id=$ordem_id");
+        exit;
+    } catch (mysqli_sql_exception $erro) {
+
+        $conn->rollback();
+        header("location: editar_ordem.php?id=$id&erro=falha_editar_ordem");
+        exit;
     }
-    header("Location: ver_ordem.php?id=$ordem_id");
-    exit;
 }
 
 
@@ -166,8 +184,7 @@ include "includes/sidebar.php";
                     <select name="status" id="status" class="form-control">
                         <option value="aberta">aberto</option>
                         <option value="em_andamento">andamento</option>
-                        <option value="concluida">concluido</option>
-                        <option value="cancelada">cancelada</option>
+
                     </select>
                 </div>
 
