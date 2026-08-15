@@ -55,6 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $servicos = $_POST['servicos'] ?? [];
     $status = $_POST['status'];
 
+    $status_permitidos = ['aberta', 'em_andamento'];
+
+    if (!in_array($status, $status_permitidos, true)) {
+        header("location: ordens.php?erro=status_invalido");
+        exit;
+    }
+
     if (empty($cliente_id) || empty($moto_id) || empty($servicos) || empty($status)) {
         header("location: ordens.php?erro=campos_vazios");
         exit;
@@ -191,8 +198,6 @@ include "includes/sidebar.php";
 
                     <option value="aberta">aberto</option>
                     <option value="em_andamento">andamento</option>
-                    <option value="concluida">concluido</option>
-                    <option value="cancelada">cancelada</option>
                 </select>
 
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">

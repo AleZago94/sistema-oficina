@@ -2,6 +2,19 @@
 require_once "includes/autenticacao.php";
 
 require_once "config/conexao.php";
+require_once "includes/helpers.php";
+
+if($_SERVER['REQUEST_METHOD'] !== 'POST'){
+    header("location: motos.php?erro=requisicao_invalida");
+    exit;
+
+}
+
+if(!validarCsrf()){
+    header("location: motos.php?erro=token_invalido");
+    exit;
+
+}
 
 if (!isset($_GET['id'])) {
     header("location: motos.php?erro=id_nao_encontrado");

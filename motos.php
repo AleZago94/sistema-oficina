@@ -2,8 +2,8 @@
 require_once "includes/autenticacao.php";
 
 require_once "config/conexao.php";
-include "includes/header.php";
-include "includes/sidebar.php";
+require_once "includes/helpers.php";
+
 
 if (isset($_GET["erro"])) {
 
@@ -40,6 +40,10 @@ if (isset($_GET["erro"])) {
         case "token_invalido":
             echo "<script>alert('Requisicao invalida tente novamente')</script>";
             break;
+
+        case "requisicao_invalida";
+            echo "<script>alert('Requisicao invalida tente novamente')</script>";
+            break;
     }
 }
 
@@ -61,6 +65,11 @@ if (isset($_GET["sucesso"])) {
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (!validarCsrf()) {
+        header("location: motos.php?erro=token_invalido");
+        exit;
+    }
 
     $cliente_id = intval($_POST['cliente_id']);
     $marca = trim($_POST['marca']);
@@ -99,7 +108,8 @@ $sql = "SELECT motos.*, clientes.nome AS nome_cliente
 $result = $conn->query($sql);
 
 
-
+include "includes/header.php";
+include "includes/sidebar.php";
 
 ?>
 
@@ -115,8 +125,8 @@ $result = $conn->query($sql);
                     <select name="cliente_id" id="cliente_id" class="form-control">
                         <option value="">Selecione um cliente</option>
                         <?php while ($cliente = $result_clientes->fetch_assoc()): ?>
-                            <option value="<?php echo $cliente['id']; ?>">
-                                <?php echo $cliente['nome']; ?>
+                            <option value="<?php echo intval($cliente['id']); ?>">
+                                <?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endwhile; ?>
                     </select>
@@ -149,6 +159,7 @@ $result = $conn->query($sql);
             <input type="text" name="observacoes" id="observacoes" class="form-control">
 
         </div>
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
         <button type="submit" class="btn btn-primary">Salvar</button>
 
         </form>
@@ -179,16 +190,22 @@ $result = $conn->query($sql);
                     <tbody>
                         <?php while ($result_motos = $result->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $result_motos['nome_cliente']; ?></td>
-                                <td><?php echo $result_motos['marca']; ?></td>
-                                <td><?php echo $result_motos['modelo']; ?></td>
-                                <td><?php echo $result_motos['placa']; ?></td>
-                                <td><?php echo $result_motos['ano']; ?></td>
-                                <td><?php echo $result_motos['observacoes']; ?></td>
+                                <td><?php echo htmlspecialchars($result_motos['nome_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($result_motos['marca'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($result_motos['modelo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($result_motos['placa'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($result_motos['ano'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($result_motos['observacoes'], ENT_QUOTES, 'UTF-8'); ?></td>
 
                                 <td>
                                     <a href="editar_motos.php?id=<?php echo $result_motos['id']; ?>" class="btn btn-warning btn-sm">editar</a>
-                                    <a href="excluir_motos.php?id=<?php echo $result_motos['id']; ?>" class="btn btn-danger btn-sm">excluir</a>
+
+                                    <form action="excluir_motos.php?id=<?php echo intval($result_motos['id']); ?>" method="POST">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Deseja excluir esta moto?')">excluir</button>
+
+                                    </form>
+
 
 
                                 </td>
