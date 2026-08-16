@@ -54,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $problema_relatado = trim($_POST['problema_relatado']);
     $servicos = $_POST['servicos'] ?? [];
     $status = $_POST['status'];
+    $valor_mao_obra = floatval($_POST['valor_mao_obra']);
+    $valor_pecas = floatval($_POST['valor_pecas']);
 
     $status_permitidos = ['aberta', 'em_andamento'];
 
@@ -71,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $conn->begin_transaction();
 
         $sql_ordem = "INSERT INTO ordens_servico 
-        (cliente_id, moto_id, problema_relatado, status) 
+        (cliente_id, moto_id, problema_relatado, valor_mao_obra, valor_pecas, status) 
         VALUES 
-        (?, ?, ?, ?)";
+        (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql_ordem);
-        $stmt->bind_param("iiss", $cliente_id, $moto_id, $problema_relatado, $status);
+        $stmt->bind_param("iisdds", $cliente_id, $moto_id, $problema_relatado, $valor_mao_obra, $valor_pecas, $status);
         $stmt->execute();
 
         $ordem_id = $conn->insert_id;
@@ -154,7 +156,7 @@ include "includes/sidebar.php";
                             value="<?php echo intval($moto['id']); ?>"
                             data-cliente="<?php echo intval($moto['cliente_id']); ?>">
                             <?php echo htmlspecialchars($moto['marca'], ENT_QUOTES, 'UTF-8'); ?>
-                            <?php echo htmlspecialchars($moto['modelo'], ENT_QUOTES, 'UTF-8'); ?> -
+                            <?php echo htmlspecialchars($moto['modelo'], ENT_QUOTES, 'UTF-8'); ?>
                             <?php echo htmlspecialchars($moto['placa'], ENT_QUOTES, 'UTF-8'); ?>
                         </option>
                     <?php endwhile; ?>
@@ -191,6 +193,16 @@ include "includes/sidebar.php";
                 <label for="problema_relatado" class="form-label">problema relatado</label>
                 <textarea name="problema_relatado" id="problema_relatado" class="form-control"></textarea>
 
+                <div class="mb-3">
+                    <label for="valor_mao_obra" class="form-label"> valor mao da mao de obra </label>
+                    <input type="number" step="0.01" min="0" name="valor_mao_obra" id="valor_mao_obra" value="0" class="form-control">
+
+                </div>
+
+                <div class="mb-3">
+                    <label for="valor_pecas" class="form-label"> valor das pecas </label>
+                    <input type="number" step="0.01" min="0" name="valor_pecas" id="valor_pecas" value="0" class="form-control">
+                </div>
 
 
                 <label for="status" class="form-label">status</label>

@@ -193,11 +193,16 @@ if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
         //    }
 
 
-        $sql_soma_os = " SELECT SUM(s.valor) AS total
+        $sql_soma_os = " SELECT SUM(s.valor) AS total_servicos,
+         os.valor_mao_obra,
+         os.valor_pecas
         FROM ordem_servicos_itens osi
         JOIN servicos s ON osi.servico_id = s.id
         JOIN ordens_servico os ON osi.ordem_servico_id = os.id
-        WHERE os.id = ? ";
+        WHERE os.id = ?
+        GROUP BY  os.id,
+                  os.valor_mao_obra,
+                  os.valor_pecas";
 
         $stmt_soma_os = $conn->prepare($sql_soma_os);
 
@@ -217,7 +222,12 @@ if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
         $soma = $stmt_soma_os->get_result();
         $soma_os = $soma->fetch_assoc();
 
-        $os = $soma_os['total'] ?? 0;
+        // $os = $soma_os['total'] ?? 0;
+        $total_servicos = $soma_os['total_servicos'] ?? 0;
+        $mao_obra = $soma_os['valor_mao_obra'] ?? 0;
+        $pecas = $soma_os['valor_pecas'] ?? 0;
+
+        $total_os = $total_servicos + $mao_obra + $pecas;
 
 
         $insert_os = "INSERT INTO movimentacoes_financeiras (tipo, descricao, valor, origem, ordem_id) VALUES (?, ?, ?, ?, ?)";
@@ -229,7 +239,7 @@ if (isset($_POST['concluir']) && $_POST['concluir'] === '1') {
         //      header("location: ver_ordem.php?id=$id&erro=falha_ao_preparar_movimentacao");
         //       exit;
         //       }
-        $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $os, $origem, $id);
+        $stmt_insert_os->bind_param("ssdsi", $tipo, $descricao, $total_os, $origem, $id);
         $stmt_insert_os->execute();
 
         //  if (!$stmt_insert_os->execute()) {
@@ -316,6 +326,8 @@ if (isset($_POST['cancelar']) && $_POST['cancelar'] === '1') {
 $sql = "SELECT os.id,
                    os.status,
                    os.problema_relatado,
+                   os.valor_mao_obra,
+                   os.valor_pecas,
                    os.created_at,
                    c.nome AS cliente_nome,
                    c.telefone,
@@ -403,7 +415,9 @@ include "includes/sidebar.php";
                             </thead>
 
                             <tbody>
+                                <?php $total_servicos = 0; ?>
                                 <?php while ($item = $result_item->fetch_assoc()): ?>
+                                    <?php $total_servicos += $item['valor']; ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($item['os_nome'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td>R$ <?php echo number_format($item['valor'], 2, ',', '.'); ?></td>
@@ -411,6 +425,34 @@ include "includes/sidebar.php";
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
+                        <?php
+                        $mao_obra = $ordem['valor_mao_obra'] ?? 0;
+                        $pecas = $ordem['valor_pecas'] ?? 0;
+
+                        $total_os = $total_servicos + $mao_obra + $pecas;
+                        ?>
+
+                        <hr>
+
+                        <p>
+                            <strong>Total dos serviços:</strong>
+                            R$ <?php echo number_format($total_servicos, 2, ',', '.'); ?>
+                        </p>
+
+                        <p>
+                            <strong>Mão de obra:</strong>
+                            R$ <?php echo number_format($mao_obra, 2, ',', '.'); ?>
+                        </p>
+
+                        <p>
+                            <strong>Peças:</strong>
+                            R$ <?php echo number_format($pecas, 2, ',', '.'); ?>
+                        </p>
+
+                        <h4>
+                            <strong>Total da OS:</strong>
+                            R$ <?php echo number_format($total_os, 2, ',', '.'); ?>
+                        </h4>
                     </div>
                 </div>
                 <!-- botão imprimir aqui -->
