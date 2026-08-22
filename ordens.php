@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     } catch (mysqli_sql_exception $erro) {
         $conn->rollback();
-
+        error_log("Erro ao cadastrar OS: " . $erro->getMessage());
         header("location: ordens.php?erro=falha_cadastrar_ordem");
         exit;
     }
