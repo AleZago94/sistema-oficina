@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($marca) || empty($modelo) || empty($placa) || empty($ano)) {
 
-        header("location: editar_motos?id=$id&erro=campos_vazios");
+        header("location: editar_motos.php?id=$id&erro=campos_vazios");
         exit;
     }
 
