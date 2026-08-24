@@ -58,43 +58,55 @@ include "includes/sidebar.php";
 
       <div class="row">
         <div class="col-lg-3 col-6">
-          <div class="small-box text-bg-primary">
+          <div class="small-box pachecos-box pachecos-box-blue">
             <div class="inner">
+
               <h3><?php echo intval($total_clientes); ?></h3>
               <p>Clientes</p>
+              <div class="pachecos-box-icon">
+                <i class="bi bi-people"></i>
+              </div>
             </div>
             <a href="clientes.php" class="small-box-footer">Ver clientes</a>
           </div>
         </div>
 
         <div class="col-lg-3 col-6">
-          <div class="small-box text-bg-success">
+          <div class="small-box pachecos-box pachecos-box-dark">
             <div class="inner">
               <h3><?php echo intval($total_moto); ?></h3>
               <p>Motos</p>
+              <div class="pachecos-box-icon">
+                <i class="bi bi-scooter"></i>
+              </div>
             </div>
             <a href="motos.php" class="small-box-footer">Ver motos</a>
           </div>
         </div>
 
         <div class="col-lg-3 col-6">
-          <div class="small-box text-bg-warning">
+          <div class="small-box pachecos-box pachecos-box-lightblue">
             <div class="inner">
               <h3><?php echo intval($total_servicos); ?></h3>
               <p>Serviços</p>
+              <div class="pachecos-box-icon">
+                <i class="bi bi-tools"></i>
+              </div>
             </div>
             <a href="servicos.php" class="small-box-footer">Ver serviços</a>
           </div>
         </div>
 
         <div class="col-lg-3 col-6">
-          <div class="small-box text-bg-danger">
+          <div class="small-box pachecos-box pachecos-box-danger">
             <div class="inner">
               <h3><?php echo intval($total_os_aberta); ?></h3>
               <p>OS abertas</p>
+              <div class="pachecos-box-icon">
+                <i class="bi bi-clipboard-check"></i>
+              </div>
             </div>
-            <a href="ordens.php" class="small-box-footer">Ver ordens</a>
-
+            <a href="listar_ordens.php" class="small-box-footer">Ver ordens</a>
           </div>
         </div>
       </div>
@@ -126,7 +138,36 @@ include "includes/sidebar.php";
                         <td><?php echo htmlspecialchars($os['nome_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td><?php echo htmlspecialchars($os['modelo_moto'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td><?php echo htmlspecialchars($os['placa'], ENT_QUOTES, 'UTF-8'); ?></td>
-                        <td><?php echo htmlspecialchars($os['status'], ENT_QUOTES, 'UTF-8'); ?></td>
+
+                        <?php switch ($os['status']) {
+                          case "aberta":
+                            $classe_status = "bg-warning text-dark";
+                            break;
+
+                          case "em_andamento":
+                            $classe_status = "bg-primary";
+                            break;
+
+                          case "concluida":
+                            $classe_status = "bg-success";
+                            break;
+
+                          case "cancelada":
+                            $classe_status = "bg-danger";
+                            break;
+
+                          default:
+                            $classe_status = "bg-secondary";
+                        }
+                        ?>
+
+                        <td>
+                          <span class="badge <?php echo $classe_status; ?>">
+                            <?php echo htmlspecialchars($os['status'], ENT_QUOTES, 'UTF-8'); ?>
+                          </span>
+                        </td>
+
+
                         <td> <a href="ver_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm">Ver</a></td>
                         <td><a href="editar_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm">Editar</a></td>
                       </tr>

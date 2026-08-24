@@ -1,0 +1,166 @@
+.sidebar-brand {
+    min-height: 75px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pachecos-brand-logo {
+    width: 65px !important;
+    height: 65px !important;
+    max-height: none !important;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.app-sidebar {
+    background: #15191f !important;
+}
+
+.sidebar-brand .brand-link {
+    color: #ffffff;
+}
+
+.sidebar-menu .nav-link {
+    color: #d7dce2;
+    border-radius: 8px;
+    margin: 3px 8px;
+}
+
+.sidebar-menu .nav-link:hover {
+    background: rgba(0, 82, 255, 0.15);
+    color: #ffffff;
+}
+
+.sidebar-menu .nav-link.active {
+    background: #164cff;
+    color: #ffffff;
+}
+
+
+/* Marca d'água */
+.app-main {
+    position: relative;
+}
+
+.app-main::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background-image: url("../img/marca-pachecos.jpeg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 68% auto;
+
+    opacity: 0.09;
+    filter: grayscale(35%) saturate(70%);
+
+    z-index: 0;
+    pointer-events: none;
+}
+
+.app-main>* {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Cards */
+.app-main .card {
+    background-color: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(1px);
+}
+
+.app-main .card-header {
+    background-color: rgba(255, 255, 255, 0.72);
+}
+
+.app-main .card-body {
+    background-color: rgba(255, 255, 255, 0.72);
+}
+
+
+/* Tabela */
+.app-main .table> :not(caption)>*>* {
+    background-color: rgba(255, 255, 255, 0.62) !important;
+    box-shadow: none !important;
+}
+
+.app-main .table-striped>tbody>tr:nth-of-type(odd)>* {
+    background-color: rgba(235, 235, 235, 0.58) !important;
+    box-shadow: none !important;
+}
+
+
+
+.pachecos-box {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+    color: #fff;
+    min-height: 130px;
+}
+
+.pachecos-box .inner {
+    position: relative;
+    z-index: 2;
+    padding: 18px 20px;
+}
+
+.pachecos-box .inner h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.pachecos-box .inner p {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.pachecos-box-icon {
+    position: absolute;
+    right: 20px;
+    top: 18px;
+    z-index: 1;
+    font-size: 3.4rem;
+    color: rgba(255, 255, 255, 0.32);
+}
+
+.pachecos-box .small-box-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding: 10px 18px;
+    text-align: left;
+    text-decoration: none;
+    color: #fff;
+
+    background: rgba(0, 0, 0, 0.18);
+    z-index: 2;
+}
+
+.pachecos-box .small-box-footer:hover {
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.pachecos-box-blue {
+    background: linear-gradient(135deg, #0d4ed8, #155df5);
+}
+
+.pachecos-box-dark {
+    background: linear-gradient(135deg, #202935, #111820);
+}
+
+.pachecos-box-lightblue {
+    background: linear-gradient(135deg, #2477dd, #2f8cff);
+}
+
+.pachecos-box-danger {
+    background: linear-gradient(135deg, #dc2430, #ef3340);
+}
