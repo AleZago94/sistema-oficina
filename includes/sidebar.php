@@ -130,7 +130,7 @@
 
             <li class="nav-item">
               <a href="motos.php" class="nav-link">
-                <i class="nav-icon bi bi-scooter"></i>
+                <img src="img/moto.svg" alt="Moto" class="sidebar-moto-icon">
                 <p>Motos</p>
               </a>
             </li>
@@ -145,7 +145,7 @@
 
 
             <li class="nav-item">
-              <a href="ordens.php" class="nav-link">
+              <a href="listar_ordens.php" class="nav-link">
                 <i class="nav-icon bi bi-clipboard-check"></i>
                 <p>Ordens de Serviço</p>
               </a>

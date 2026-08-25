@@ -134,89 +134,131 @@ include "includes/sidebar.php";
 
 <main class="app-main">
     <div class="app-content">
-        <div class="container-fluid">
-            <h1>Orden de servico</h1>
-            <form action="" method="POST">
-                <label for="cliente_id" class="form-label"></label>
+        <div class="container-fluid py-4">
 
-                <select name="cliente_id" id="cliente_id" class="form-control">
-                    <option value="">Selecione o cliente</option>
-                    <?php while ($cliente = $result_clientes->fetch_assoc()): ?>
-                        <option value="<?php echo intval($cliente['id']); ?>">
-                            <?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Nova Ordem de Serviço</h4>
 
-                <label for="moto_id" class="form-label"></label>
-                <select name="moto_id" id="moto_id" class="form-control">
-                    <option value="">selecione a moto</option>
-                    <?php while ($moto = $result_motos->fetch_assoc()): ?>
-                        <option
-                            value="<?php echo intval($moto['id']); ?>"
-                            data-cliente="<?php echo intval($moto['cliente_id']); ?>">
-                            <?php echo htmlspecialchars($moto['marca'], ENT_QUOTES, 'UTF-8'); ?>
-                            <?php echo htmlspecialchars($moto['modelo'], ENT_QUOTES, 'UTF-8'); ?>
-                            <?php echo htmlspecialchars($moto['placa'], ENT_QUOTES, 'UTF-8'); ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
+                <a href="listar_ordens.php" class="btn btn-secondary btn-sm">
+                    Voltar
+                </a>
+            </div>
+            <div class="card card-transparente">
+                <div class="card-body">
+
+                    <form action="" method="POST">
+                        <div class="mb-3">
+                            <label for="cliente_id" class="form-label">Cliente</label>
+
+                            <select name="cliente_id" id="cliente_id" class="form-control">
+                                <option value="">Selecione o cliente</option>
+                                <?php while ($cliente = $result_clientes->fetch_assoc()): ?>
+                                    <option value="<?php echo intval($cliente['id']); ?>">
+                                        <?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="moto_id" class="form-label">Moto</label>
+                            <select name="moto_id" id="moto_id" class="form-control">
+                                <option value="">selecione a moto</option>
+                                <?php while ($moto = $result_motos->fetch_assoc()): ?>
+                                    <option
+                                        value="<?php echo intval($moto['id']); ?>"
+                                        data-cliente="<?php echo intval($moto['cliente_id']); ?>">
+                                        <?php echo htmlspecialchars($moto['marca'], ENT_QUOTES, 'UTF-8'); ?>
+                                        <?php echo htmlspecialchars($moto['modelo'], ENT_QUOTES, 'UTF-8'); ?>
+                                        <?php echo htmlspecialchars($moto['placa'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
 
 
-                <label class="form-label">Serviços</label>
+                        <div class="mb-3">
 
-                <?php while ($servico = $result_servicos->fetch_assoc()): ?>
+                            <label class="form-label fw-semibold">Serviços</label>
+                            <div class="pachecos-servicos-box">
+                                <div class="row">
+                                    <?php while ($servico = $result_servicos->fetch_assoc()): ?>
 
-                    <div class="form-check mb-2">
 
-                        <input
-                            class="form-check-input"
-                            type="checkbox"
-                            name="servicos[]"
-                            value="<?php echo intval($servico['id']); ?>"
-                            id="servico_<?php echo intval($servico['id']); ?>">
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
 
-                        <label
-                            class="form-check-label"
-                            for="servico_<?php echo intval($servico['id']); ?>">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    name="servicos[]"
+                                                    value="<?php echo intval($servico['id']); ?>"
+                                                    id="servico_<?php echo intval($servico['id']); ?>">
 
-                            <?php echo htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                            -
-                            R$ <?php echo number_format($servico['valor'], 2, ',', '.'); ?>
+                                                <label
+                                                    class="form-check-label"
+                                                    for="servico_<?php echo intval($servico['id']); ?>">
 
-                        </label>
+                                                    <?php echo htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    -
+                                                    R$ <?php echo number_format($servico['valor'], 2, ',', '.'); ?>
 
-                    </div>
+                                                </label>
 
-                <?php endwhile; ?>
+                                            </div>
 
-                <label for="problema_relatado" class="form-label">problema relatado</label>
-                <textarea name="problema_relatado" id="problema_relatado" class="form-control"></textarea>
+                                        </div>
 
-                <div class="mb-3">
-                    <label for="valor_mao_obra" class="form-label"> valor mao da mao de obra </label>
-                    <input type="number" step="0.01" min="0" name="valor_mao_obra" id="valor_mao_obra" value="0" class="form-control">
+                                    <?php endwhile; ?>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
+
+
+                        <label for="problema_relatado" class="form-label">problema relatado</label>
+                        <textarea name="problema_relatado" id="problema_relatado" class="form-control"></textarea>
+
+                        <div class="mb-3">
+                            <label for="valor_mao_obra" class="form-label"> valor da mao de obra </label>
+                            <input type="number" step="0.01" min="0" name="valor_mao_obra" id="valor_mao_obra" value="0" class="form-control">
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valor_pecas" class="form-label"> valor das pecas </label>
+                            <input type="number" step="0.01" min="0" name="valor_pecas" id="valor_pecas" value="0" class="form-control">
+                        </div>
+
+
+                        <label for="status" class="form-label">status</label>
+                        <select name="status" id="status" class="form-control">
+
+                            <option value="aberta">aberto</option>
+                            <option value="em_andamento">andamento</option>
+                        </select>
+
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
+
+                        <button type="submit" class="btn btn-primary mt-3">Salvar OS</button>
+
+                    </form>
+
+
+
+
+
+
 
                 </div>
 
-                <div class="mb-3">
-                    <label for="valor_pecas" class="form-label"> valor das pecas </label>
-                    <input type="number" step="0.01" min="0" name="valor_pecas" id="valor_pecas" value="0" class="form-control">
-                </div>
+            </div>
 
 
-                <label for="status" class="form-label">status</label>
-                <select name="status" id="status" class="form-control">
-
-                    <option value="aberta">aberto</option>
-                    <option value="em_andamento">andamento</option>
-                </select>
-
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
-
-                <button type="submit" class="btn btn-primary mt-3">Salvar OS</button>
-
-            </form>
 
         </div>
 

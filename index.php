@@ -77,7 +77,7 @@ include "includes/sidebar.php";
               <h3><?php echo intval($total_moto); ?></h3>
               <p>Motos</p>
               <div class="pachecos-box-icon">
-                <i class="bi bi-scooter"></i>
+                <img src="img/moto.svg" alt="">
               </div>
             </div>
             <a href="motos.php" class="small-box-footer">Ver motos</a>
@@ -128,6 +128,7 @@ include "includes/sidebar.php";
                       <th>Moto</th>
                       <th>Placa</th>
                       <th>Status</th>
+                      <th>Ações</th>
                     </tr>
                   </thead>
 
@@ -168,8 +169,11 @@ include "includes/sidebar.php";
                         </td>
 
 
-                        <td> <a href="ver_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm">Ver</a></td>
-                        <td><a href="editar_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm">Editar</a></td>
+                        <td>
+                          <a href="ver_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-primary btn-sm me-1">Ver</a>
+                          <a href="editar_ordem.php?id=<?php echo intval($os['id']); ?>" class="btn btn-secondary btn-sm me-1">Editar</a>
+                        </td>
+
                       </tr>
                     <?php endwhile; ?>
                   </tbody>
@@ -188,10 +192,36 @@ include "includes/sidebar.php";
             </div>
 
             <div class="card-body">
-              <p>Abertas: <?php echo intval($total_os_aberta); ?></p>
-              <p>Em andamento: <?php echo intval($total_os_andamento); ?></p>
-              <p>Concluídas: <?php echo intval($total_os_concluidas); ?></p>
-              <p>caceladas: <?php echo intval($total_canceladas); ?></p>
+
+              <div class="d-flex justify-content-between resumo-os-item">
+                <span>
+                  <span class="status-dot bg-warning"></span>
+                  Abertas</span>
+                <strong><?php echo intval($total_os_aberta); ?></strong>
+              </div>
+
+              <div class="d-flex justify-content-between resumo-os-item">
+                <span>
+                  <span class="status-dot bg-primary"></span>
+                  Em andamento</span>
+                <strong> <?php echo intval($total_os_andamento); ?></strong>
+
+              </div>
+
+              <div class="d-flex justify-content-between resumo-os-item">
+                <span>
+                  <span class="status-dot bg-success"></span>
+                  Concluídas</span>
+                <strong><?php echo intval($total_os_concluidas); ?></strong>
+              </div>
+
+              <div class="d-flex justify-content-between resumo-os-item">
+                <span>
+                  <span class="status-dot bg-danger"></span>
+                  Canceladas</span>
+                <strong><?php echo intval($total_canceladas); ?></strong>
+              </div>
+
             </div>
           </div>
         </div>

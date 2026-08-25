@@ -385,46 +385,164 @@ include "includes/sidebar.php";
 
             <?php if ($ordem): ?>
 
-                <!-- card da OS aqui -->
-                <div class="card-header">
-                    <h3 class="card-title">OS # <?php echo intval($ordem['id']); ?></h3>
+                <?php
+                switch ($ordem['status']) {
+                    case 'aberta':
+                        $classe_status = 'bg-warning text-dark';
+                        $texto_status = 'Aberta';
+                        break;
+
+                    case 'em_andamento':
+                        $classe_status = 'bg-primary';
+                        $texto_status = 'Em andamento';
+                        break;
+
+                    case 'concluida':
+                        $classe_status = 'bg-success';
+                        $texto_status = 'Concluída';
+                        break;
+
+                    case 'cancelada':
+                        $classe_status = 'bg-danger';
+                        $texto_status = 'Cancelada';
+                        break;
+
+                    default:
+                        $classe_status = 'bg-secondary';
+                        $texto_status = 'Desconhecido';
+                }
+                ?>
+
+                <!-- Cabeçalho da página -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="mb-1">
+                            Ordem de Serviço #<?php echo intval($ordem['id']); ?>
+                        </h4>
+
+                        <span class="badge <?php echo $classe_status; ?>">
+                            <?php echo $texto_status; ?>
+                        </span>
+                    </div>
+
+                    <a href="listar_ordens.php" class="btn btn-secondary btn-sm">
+                        Voltar
+                    </a>
                 </div>
-                <div class="card-body">
-                    <p><strong>Cliente</strong> <?php echo htmlspecialchars($ordem['cliente_nome'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p><strong>Telefone</strong><?php echo htmlspecialchars($ordem['telefone'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p><strong>Moto</strong><?php echo htmlspecialchars($ordem['modelo_moto'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p><strong>Placa</strong><?php echo htmlspecialchars($ordem['placa'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p><strong>Status</strong><?php echo htmlspecialchars($ordem['status'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p><strong>Problema relatado</strong><?php echo htmlspecialchars($ordem['problema_relatado'], ENT_QUOTES, 'UTF-8'); ?></p>
 
 
+                <!-- Dados principais da OS -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Dados da Ordem</h3>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>Cliente:</strong><br>
+                                    <?php echo htmlspecialchars($ordem['cliente_nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                </p>
+
+                                <p class="mb-md-0">
+                                    <strong>Telefone:</strong><br>
+                                    <?php echo htmlspecialchars($ordem['telefone'], ENT_QUOTES, 'UTF-8'); ?>
+                                </p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>Moto:</strong><br>
+                                    <?php echo htmlspecialchars($ordem['modelo_moto'], ENT_QUOTES, 'UTF-8'); ?>
+                                </p>
+
+                                <p class="mb-md-0">
+                                    <strong>Placa:</strong><br>
+                                    <?php echo htmlspecialchars($ordem['placa'], ENT_QUOTES, 'UTF-8'); ?>
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <div>
+                            <strong>Problema relatado:</strong>
+
+                            <div class="mt-2 p-3 border rounded bg-body-tertiary">
+                                <?php
+                                echo htmlspecialchars(
+                                    $ordem['problema_relatado'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                );
+                                ?>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <!-- tabela de serviços aqui -->
+
+
+                <!-- Serviços -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h3 class="card-title">Serviços da OS</h3>
                     </div>
 
                     <div class="card-body">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Serviço</th>
-                                    <th>Valor</th>
-                                </tr>
-                            </thead>
 
-                            <tbody>
-                                <?php $total_servicos = 0; ?>
-                                <?php while ($item = $result_item->fetch_assoc()): ?>
-                                    <?php $total_servicos += $item['valor']; ?>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle">
+                                <thead>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($item['os_nome'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td>R$ <?php echo number_format($item['valor'], 2, ',', '.'); ?></td>
+                                        <th>Serviço</th>
+                                        <th class="text-end">Valor</th>
                                     </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+
+                                    <?php $total_servicos = 0; ?>
+
+                                    <?php while ($item = $result_item->fetch_assoc()): ?>
+
+                                        <?php $total_servicos += $item['valor']; ?>
+
+                                        <tr>
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $item['os_nome'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+                                            <td class="text-end">
+                                                R$
+                                                <?php
+                                                echo number_format(
+                                                    $item['valor'],
+                                                    2,
+                                                    ',',
+                                                    '.'
+                                                );
+                                                ?>
+                                            </td>
+                                        </tr>
+
+                                    <?php endwhile; ?>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+
                         <?php
                         $mao_obra = $ordem['valor_mao_obra'] ?? 0;
                         $pecas = $ordem['valor_pecas'] ?? 0;
@@ -432,71 +550,162 @@ include "includes/sidebar.php";
                         $total_os = $total_servicos + $mao_obra + $pecas;
                         ?>
 
-                        <hr>
 
-                        <p>
-                            <strong>Total dos serviços:</strong>
-                            R$ <?php echo number_format($total_servicos, 2, ',', '.'); ?>
-                        </p>
+                        <!-- Resumo financeiro -->
+                        <div class="row justify-content-end mt-4">
 
-                        <p>
-                            <strong>Mão de obra:</strong>
-                            R$ <?php echo number_format($mao_obra, 2, ',', '.'); ?>
-                        </p>
+                            <div class="col-md-5 col-lg-4">
 
-                        <p>
-                            <strong>Peças:</strong>
-                            R$ <?php echo number_format($pecas, 2, ',', '.'); ?>
-                        </p>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Serviços</span>
 
-                        <h4>
-                            <strong>Total da OS:</strong>
-                            R$ <?php echo number_format($total_os, 2, ',', '.'); ?>
-                        </h4>
+                                    <strong>
+                                        R$ <?php echo number_format($total_servicos, 2, ',', '.'); ?>
+                                    </strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Mão de obra</span>
+
+                                    <strong>
+                                        R$ <?php echo number_format($mao_obra, 2, ',', '.'); ?>
+                                    </strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Peças</span>
+
+                                    <strong>
+                                        R$ <?php echo number_format($pecas, 2, ',', '.'); ?>
+                                    </strong>
+                                </div>
+
+                                <hr>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>Total da OS</strong>
+
+                                    <h4 class="mb-0">
+                                        R$ <?php echo number_format($total_os, 2, ',', '.'); ?>
+                                    </h4>
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
                 </div>
-                <!-- botão imprimir aqui -->
-                <a
-                    href="imprimir_os.php?id=<?php echo intval($ordem['id']); ?>"
-                    target="_blank"
-                    class="btn btn-secondary">
-                    Imprimir Comanda
-                </a>
-                <?php if ($ordem['status'] != 'concluida' && $ordem['status'] != 'cancelada'):  ?>
-                    <!-- <a
-                        href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>&concluir=1" class="btn btn-success" onclick="return confirm('Deseja concluir esta OS?')">
-                        Concluir OS
-                    </a> -->
-                    <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
-                        <input type="hidden" name="concluir" value="1">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
-                        <button class="btn btn-success" onclick="return confirm('Deseja concluir esta OS')">Concluir OS</button>
 
-                    </form>
-                <?php endif ?>
 
-                <?php if ($ordem['status'] != 'cancelada' && $ordem['status'] == 'aberta'): ?>
+                <!-- Ações -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ações</h3>
+                    </div>
 
-                    <form method="POST" action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
-                        <input type="hidden" name="cancelar" value="1">
+                    <div class="card-body">
 
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="d-flex flex-wrap gap-2">
 
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Cancelar OS')"> Cancelar OS</button>
-                    </form>
-                <?php endif ?>
+                            <a
+                                href="imprimir_os.php?id=<?php echo intval($ordem['id']); ?>"
+                                target="_blank"
+                                class="btn btn-secondary">
+                                Imprimir Comanda
+                            </a>
+
+
+                            <?php if (
+                                $ordem['status'] != 'concluida'
+                                && $ordem['status'] != 'cancelada'
+                            ): ?>
+
+                                <form
+                                    method="POST"
+                                    action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
+
+                                    <input
+                                        type="hidden"
+                                        name="concluir"
+                                        value="1">
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?php
+                                                echo htmlspecialchars(
+                                                    $_SESSION['csrf_token'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-success"
+                                        onclick="return confirm('Deseja concluir esta OS?')">
+                                        Concluir OS
+                                    </button>
+
+                                </form>
+
+                            <?php endif; ?>
+
+
+                            <?php if (
+                                $ordem['status'] != 'cancelada'
+                                && $ordem['status'] == 'aberta'
+                            ): ?>
+
+                                <form
+                                    method="POST"
+                                    action="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>">
+
+                                    <input
+                                        type="hidden"
+                                        name="cancelar"
+                                        value="1">
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?php
+                                                echo htmlspecialchars(
+                                                    $_SESSION['csrf_token'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Deseja cancelar esta OS?')">
+                                        Cancelar OS
+                                    </button>
+
+                                </form>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </div>
+                </div>
+
 
             <?php else: ?>
 
-                <p>Nenhuma ordem encontrada.</p>
+                <div class="alert alert-warning">
+                    Nenhuma ordem encontrada.
+                </div>
 
             <?php endif; ?>
 
         </div>
     </div>
 </main>
-
-
 
 
 <?php include "includes/footer.php"; ?>

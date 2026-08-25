@@ -27,63 +27,78 @@ include "includes/sidebar.php";
 <main class="app-main">
     <div class="app-content">
         <div class="container-fluid py-4">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>OS</th>
-                        <th>Cliente</th>
-                        <th>Moto</th>
-                        <th>Placa</th>
-                        <th>Status</th>
-                        <th>Data</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                <tbody>
-                    <?php while ($ordem = $result_ordens->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $ordem['id']; ?></td>
-                            <td><?php echo $ordem['nome_cliente']; ?></td>
-                            <td><?php echo $ordem['marca'] . ' ' . $ordem['modelo']; ?></td>
-                            <td><?php echo $ordem['placa']; ?></td>
+                <h4 class="mb-0">Ordens de Serviço</h4>
 
-                            <?php $ordem['status'];
+                <a href="ordens.php" class="btn btn-primary btn-sm me-1">Nova OS</a>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>OS</th>
+                                <th>Cliente</th>
+                                <th>Moto</th>
+                                <th>Placa</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
 
-                            switch ($ordem['status']) {
-                                case "aberta":
-                                    $classe_status = "bg-warning text-dark";
-                                    break;
+                        <tbody>
+                            <?php while ($ordem = $result_ordens->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo  intval($ordem['id']); ?></td>
+                                    <td><?php echo htmlspecialchars($ordem['nome_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($ordem['marca'], ENT_QUOTES, 'UTF-8'), ' ' . htmlspecialchars($ordem['modelo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($ordem['placa'], ENT_QUOTES, 'UTF-8'); ?></td>
 
-                                case "em_andamento":
-                                    $classe_status = "bg-primary";
-                                    break;
+                                    <?php
 
-                                case "concluida":
-                                    $classe_status = "bg-success";
-                                    break;
+                                    switch ($ordem['status']) {
+                                        case "aberta":
+                                            $classe_status = "bg-warning text-dark";
+                                            break;
 
-                                case "cancelada":
-                                    $classe_status = "bg-danger";
-                                    break;
-                            }
-                            ?>
-                            <td>
-                                <span class="badge <?php echo $classe_status; ?>"><?php echo $ordem['status']; ?>
-                                </span>
-                            </td>
+                                        case "em_andamento":
+                                            $classe_status = "bg-primary";
+                                            break;
+
+                                        case "concluida":
+                                            $classe_status = "bg-success";
+                                            break;
+
+                                        case "cancelada":
+                                            $classe_status = "bg-danger";
+                                            break;
+
+                                        default:
+                                            $classe_status = "bg-secondary";
+                                    }
+                                    ?>
+                                    <td>
+                                        <span class="badge <?php echo $classe_status; ?>"><?php echo htmlspecialchars($ordem['status'], ENT_QUOTES, 'UTF-8'); ?>
+                                        </span>
+                                    </td>
 
 
 
 
-                            <td><?php echo date('d/m/Y H:i', strtotime($ordem['created_at'])); ?></td>
-                            <td><a href="ver_ordem.php?id=<?php echo $ordem['id']; ?>" class="btn btn-primary btn-sm"> ver</a></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($ordem['created_at'])); ?></td>
+                                    <td><a href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>" class="btn btn-primary btn-sm"> ver</a></td>
 
-                        </tr>
-                    <?php endwhile; ?>
+                                </tr>
+                            <?php endwhile; ?>
 
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
 
         </div>
 
