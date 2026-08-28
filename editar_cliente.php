@@ -68,30 +68,172 @@ include "includes/sidebar.php";
 
 ?>
 <main class="app-main">
+
     <div class="app-content">
-        <div class="container-fluid">
-            <form action="" method="POST">
-                <input type="hidden" name="id" value="<?php echo intval($cliente['id']); ?>">
+        <div class="container-fluid py-4">
 
-                <label for="nome" class="form-label">Nome</label>
-                <input type="text" name="nome" id="nome" value="<?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
+            <!-- Cabeçalho -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                <label for="telefone" class="form-label">telefone:</label>
-                <input type="text" name="telefone" id="telefone" value="<?php echo htmlspecialchars($cliente['telefone'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
+                <div>
+                    <h4 class="mb-1">Editar Cliente</h4>
 
-                <label for="cpf" class="form-label">CPF</label>
-                <input type="text" name="cpf" id="cpf" value="<?php echo htmlspecialchars($cliente['cpf'], ENT_QUOTES, 'UTF-8'); ?>" class="form-control">
+                    <small class="text-muted">
+                        Atualize os dados do cliente
+                    </small>
+                </div>
 
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');  ?>">
+                <a
+                    href="clientes.php"
+                    class="btn btn-secondary btn-sm">
+                    Voltar
+                </a>
 
-                <button type="submit" class="btn btn-primary mt-3">Salvar Alteraçao</button>
+            </div>
 
-            </form>
+
+            <!-- Card -->
+            <div class="card">
+
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Dados do Cliente
+                    </h3>
+                </div>
+
+
+                <div class="card-body">
+
+                    <form action="" method="POST">
+
+                        <input
+                            type="hidden"
+                            name="id"
+                            value="<?php echo intval($cliente['id']); ?>">
+
+
+                        <div class="row">
+
+                            <!-- Nome -->
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="nome"
+                                    class="form-label">
+                                    Nome
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="nome"
+                                    id="nome"
+                                    value="<?php
+                                            echo htmlspecialchars(
+                                                $cliente['nome'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            );
+                                            ?>"
+                                    class="form-control">
+
+                            </div>
+
+
+                            <!-- Telefone -->
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="telefone"
+                                    class="form-label">
+                                    Telefone
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="telefone"
+                                    id="telefone"
+                                    value="<?php
+                                            echo htmlspecialchars(
+                                                $cliente['telefone'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            );
+                                            ?>"
+                                    class="form-control">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="row">
+
+                            <!-- CPF -->
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="cpf"
+                                    class="form-label">
+                                    CPF
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="cpf"
+                                    id="cpf"
+                                    value="<?php
+                                            echo htmlspecialchars(
+                                                $cliente['cpf'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            );
+                                            ?>"
+                                    class="form-control">
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CSRF -->
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?php
+                                    echo htmlspecialchars(
+                                        $_SESSION['csrf_token'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    );
+                                    ?>">
+
+
+                        <!-- Ações -->
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+
+                            <a
+                                href="clientes.php"
+                                class="btn btn-secondary">
+                                Cancelar
+                            </a>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+                                Salvar alterações
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
         </div>
     </div>
 
-
 </main>
-
 
 <?php include "includes/footer.php"; ?>

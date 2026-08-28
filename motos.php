@@ -114,115 +114,372 @@ include "includes/sidebar.php";
 ?>
 
 <main class="app-main">
+
     <div class="app-content">
-        <div class="container-fluid">
-            <h1>Cadastro de motos </h1>
+        <div class="container-fluid py-4">
 
-            <form action="" method="POST">
+            <!-- Cabeçalho -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                <div class="mb-3">
-                    <label for="cliente_id" class="form-label">Cliente</label>
-                    <select name="cliente_id" id="cliente_id" class="form-control">
-                        <option value="">Selecione um cliente</option>
-                        <?php while ($cliente = $result_clientes->fetch_assoc()): ?>
-                            <option value="<?php echo intval($cliente['id']); ?>">
-                                <?php echo htmlspecialchars($cliente['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                            </option>
-                        <?php endwhile; ?>
-                    </select>
+                <div>
+                    <h4 class="mb-1">Motos</h4>
+                    <small class="text-muted">
+                        Cadastre e gerencie as motos dos clientes
+                    </small>
+                </div>
+
+            </div>
+
+
+            <!-- Cadastro -->
+            <div class="card mb-4">
+
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Nova Moto
+                    </h3>
+                </div>
+
+                <div class="card-body">
+
+                    <form action="" method="POST">
+
+                        <!-- Cliente -->
+                        <div class="mb-3">
+
+                            <label
+                                for="cliente_id"
+                                class="form-label">
+                                Cliente
+                            </label>
+
+                            <select
+                                name="cliente_id"
+                                id="cliente_id"
+                                class="form-control">
+
+                                <option value="">
+                                    Selecione um cliente
+                                </option>
+
+                                <?php while ($cliente = $result_clientes->fetch_assoc()): ?>
+
+                                    <option value="<?php echo intval($cliente['id']); ?>">
+
+                                        <?php
+                                        echo htmlspecialchars(
+                                            $cliente['nome'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        );
+                                        ?>
+
+                                    </option>
+
+                                <?php endwhile; ?>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Marca / Modelo -->
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="marca"
+                                    class="form-label">
+                                    Marca
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="marca"
+                                    id="marca"
+                                    class="form-control">
+
+                            </div>
+
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="modelo"
+                                    class="form-label">
+                                    Modelo
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="modelo"
+                                    id="modelo"
+                                    class="form-control">
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Placa / Ano -->
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="placa"
+                                    class="form-label">
+                                    Placa
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="placa"
+                                    id="placa"
+                                    class="form-control">
+
+                            </div>
+
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="ano"
+                                    class="form-label">
+                                    Ano de fabricação
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="ano"
+                                    id="ano"
+                                    class="form-control">
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Observações -->
+                        <div class="mb-3">
+
+                            <label
+                                for="observacoes"
+                                class="form-label">
+                                Observações
+                            </label>
+
+                            <textarea
+                                name="observacoes"
+                                id="observacoes"
+                                class="form-control"
+                                rows="3"></textarea>
+
+                        </div>
+
+
+                        <!-- CSRF -->
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?php
+                                    echo htmlspecialchars(
+                                        $_SESSION['csrf_token'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    );
+                                    ?>">
+
+
+                        <!-- Botão -->
+                        <div class="d-flex justify-content-end">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+                                Salvar moto
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- Listagem -->
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h3 class="card-title">
+                        Motos Cadastradas
+                    </h3>
+
                 </div>
 
 
+                <div class="card-body">
+
+                    <?php if ($result->num_rows > 0): ?>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-bordered table-striped align-middle mb-0">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Placa</th>
+                                        <th>Ano</th>
+                                        <th>Observações</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <?php while ($result_motos = $result->fetch_assoc()): ?>
+
+                                        <tr>
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_motos['nome_cliente'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_motos['marca'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_motos['modelo'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_motos['placa'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_motos['ano'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_motos['observacoes'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+
+                                            <td class="text-center">
+
+                                                <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                                    <a
+                                                        href="editar_motos.php?id=<?php echo intval($result_motos['id']); ?>"
+                                                        class="btn btn-warning btn-sm">
+                                                        Editar
+                                                    </a>
+
+
+                                                    <form
+                                                        action="excluir_motos.php?id=<?php echo intval($result_motos['id']); ?>"
+                                                        method="POST"
+                                                        class="m-0">
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="csrf_token"
+                                                            value="<?php
+                                                                    echo htmlspecialchars(
+                                                                        $_SESSION['csrf_token'],
+                                                                        ENT_QUOTES,
+                                                                        'UTF-8'
+                                                                    );
+                                                                    ?>">
+
+                                                        <button
+                                                            type="submit"
+                                                            class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Deseja excluir esta moto?')">
+                                                            Excluir
+                                                        </button>
+
+                                                    </form>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endwhile; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="text-center text-muted py-4">
+                            Nenhuma moto cadastrada.
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+            </div>
+
         </div>
-        <div class="mb-3">
-            <label for="marca" class="form-label">Marca</label>
-            <input type="text" name="marca" id="marca" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label for="modelo" class="form-label">Modelo</label>
-            <input type="text" name="modelo" id="modelo" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label for="placa" class="form-label">placa</label>
-            <input type="text" name="placa" id="placa" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label for="ano" class="form-label">ano de fabricacao</label>
-            <input type="text" name="ano" id="ano" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label for="observacoes" class="form-label">observacoes</label>
-            <input type="text" name="observacoes" id="observacoes" class="form-control">
-
-        </div>
-        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
-        <button type="submit" class="btn btn-primary">Salvar</button>
-
-        </form>
-
-    </div>
-
-
-
-
-
-    <div class="app-content">
-        <div class="container-fluid">
-            <h1>Motos cadastradas</h1>
-            <?php if ($result->num_rows > 0): ?>
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>cliente</th>
-                            <th>marca</th>
-                            <th>modelo</th>
-                            <th>placa</th>
-                            <th>ano de fabricacao</th>
-                            <th>observacoes</th>
-                            <th>acoes</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <?php while ($result_motos = $result->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($result_motos['nome_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($result_motos['marca'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($result_motos['modelo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($result_motos['placa'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($result_motos['ano'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($result_motos['observacoes'], ENT_QUOTES, 'UTF-8'); ?></td>
-
-                                <td>
-                                    <a href="editar_motos.php?id=<?php echo $result_motos['id']; ?>" class="btn btn-warning btn-sm">editar</a>
-
-                                    <form action="excluir_motos.php?id=<?php echo intval($result_motos['id']); ?>" method="POST">
-                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Deseja excluir esta moto?')">excluir</button>
-
-                                    </form>
-
-
-
-                                </td>
-
-                            </tr>
-                        <?php endwhile ?>
-                    </tbody>
-
-                </table>
-
-            <?php else: ?>
-                <p>nenhuma moto cadastrada</p>
-
-            <?php endif ?>
-
-        </div>
-
     </div>
 
 </main>

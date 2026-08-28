@@ -70,54 +70,191 @@ include "includes/sidebar.php";
 ?>
 
 <main class="app-main">
-    <div class="app-content">
-        <div class="container-fluid">
-            <h1>cadastro de servicos</h1>
-            <form action="" method="POST">
-                <label for="nome" class="form-label">nome do servico</label>
-                <input type="text" name="nome" id="nome" class="form-control">
-
-                <label for="valor" class="form-label">Valor do servico</label>
-                <input type="number" step="0.01" name="valor" id="valor" class="form-control">
-
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
-                <button type="submit" class="btn btn-primary mt-3">salvar</button>
-            </form>
-
-        </div>
-
-    </div>
-
 
     <div class="app-content">
-        <div class="container-fluid">
-            <h1>servicos cadastrados</h1>
-            <?php if ($result->num_rows > 0): ?>
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <th>servico</th>
-                        <th>valor</th>
-                    </thead>
-                    <tbody>
-                        <?php while ($result_servico = $result->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($result_servico['nome'], ENT_QUOTES, 'UTF-8'); ?> </td>
-                                <td>R$ <?php echo number_format($result_servico['valor'], 2, ',', '.'); ?></td>
-                            </tr>
-                        <?php endwhile ?>
-                    </tbody>
+        <div class="container-fluid py-4">
 
-                </table>
+            <!-- Cabeçalho -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-            <?php else: ?>
-                <p>nenhum servico cadastrado</p>
+                <div>
+                    <h4 class="mb-1">Serviços</h4>
+                    <small class="text-muted">
+                        Cadastre e consulte os serviços oferecidos pela oficina
+                    </small>
+                </div>
 
-            <?php endif ?>
+            </div>
 
-            </table>
+
+            <!-- Cadastro -->
+            <div class="card mb-4">
+
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Novo Serviço
+                    </h3>
+                </div>
+
+                <div class="card-body">
+
+                    <form action="" method="POST">
+
+                        <div class="row">
+
+                            <!-- Nome -->
+                            <div class="col-md-8 mb-3">
+
+                                <label
+                                    for="nome"
+                                    class="form-label">
+                                    Nome do serviço
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="nome"
+                                    id="nome"
+                                    class="form-control">
+
+                            </div>
+
+
+                            <!-- Valor -->
+                            <div class="col-md-4 mb-3">
+
+                                <label
+                                    for="valor"
+                                    class="form-label">
+                                    Valor
+                                </label>
+
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    name="valor"
+                                    id="valor"
+                                    class="form-control">
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CSRF -->
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?php
+                                    echo htmlspecialchars(
+                                        $_SESSION['csrf_token'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    );
+                                    ?>">
+
+
+                        <div class="d-flex justify-content-end">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+                                Salvar serviço
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- Listagem -->
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h3 class="card-title">
+                        Serviços Cadastrados
+                    </h3>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <?php if ($result->num_rows > 0): ?>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-bordered table-striped align-middle mb-0">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Serviço</th>
+                                        <th style="width: 180px;">Valor</th>
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <?php while ($result_servico = $result->fetch_assoc()): ?>
+
+                                        <tr>
+
+                                            <td>
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $result_servico['nome'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                );
+                                                ?>
+                                            </td>
+
+                                            <td>
+                                                <strong>
+                                                    R$
+                                                    <?php
+                                                    echo number_format(
+                                                        $result_servico['valor'],
+                                                        2,
+                                                        ',',
+                                                        '.'
+                                                    );
+                                                    ?>
+                                                </strong>
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endwhile; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="text-center text-muted py-4">
+                            Nenhum serviço cadastrado.
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+            </div>
 
         </div>
-
     </div>
 
 </main>
