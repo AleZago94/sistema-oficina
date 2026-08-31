@@ -66,31 +66,68 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header("location: financeiro.php?sucesso=movimentacao_salva");
     exit;
 }
+$inicioMes = new DateTime('first day of this month');
+$inicioProximoMes = new DateTime('first day of next month');
 
+$inicio = $inicioMes->format('Y-m-d 00:00:00');
+$fim = $inicioProximoMes->format('Y-m-d 00:00:00');
 
 $sql_listar = "SELECT movi.id,
                       movi.tipo,
                       movi.descricao,
                       movi.valor,
                       movi.created_at
- FROM movimentacoes_financeiras AS movi";
+               FROM movimentacoes_financeiras AS movi
+               WHERE movi.created_at >= ?
+               AND movi.created_at < ?
+               ORDER BY movi.created_at DESC";
 
-$listar = $conn->query($sql_listar);
+$stmt_listar = $conn->prepare($sql_listar);
+
+$stmt_listar->bind_param("ss", $inicio, $fim);
+
+$stmt_listar->execute();
+
+$resultado_lista = $stmt_listar->get_result();
+
+
+
+
 
 $sql_entrada = "SELECT SUM(movi.valor) AS total_entrada
                 FROM movimentacoes_financeiras movi
-                WHERE movi.tipo = 'entrada'";
+                WHERE movi.tipo = 'entrada' 
+                AND movi.created_at >= ?
+                AND movi.created_at < ? ";
 
-$total_entrada = $conn->query($sql_entrada);
-$entrada = $total_entrada->fetch_assoc();
+$stmt_entrada = $conn->prepare($sql_entrada);
+
+$stmt_entrada->bind_param("ss", $inicio, $fim);
+
+$stmt_entrada->execute();
+
+$resultado_entrada = $stmt_entrada->get_result();
+
+$entrada = $resultado_entrada->fetch_assoc();
 
 
 $sql_saida = "SELECT SUM(movi.valor) AS total_saida
              FROM  movimentacoes_financeiras movi
-             WHERE movi.tipo = 'saida'";
+             WHERE movi.tipo = 'saida'
+             AND movi.created_at >= ?
+             AND movi.created_at < ? ";
 
-$total_saida = $conn->query($sql_saida);
-$saida = $total_saida->fetch_assoc();
+$stmt_saida = $conn->prepare($sql_saida);
+
+$stmt_saida->bind_param("ss", $inicio, $fim);
+
+$stmt_saida->execute();
+
+$resultado_saida = $stmt_saida->get_result();
+
+$saida = $resultado_saida->fetch_assoc();
+
+
 
 $valor_entrada = $entrada['total_entrada'] ?? 0;
 $valor_saida = $saida['total_saida'] ?? 0;
@@ -113,115 +150,408 @@ include "includes/sidebar.php";
 ?>
 
 <main class="app-main">
+
+    <!-- Cabeçalho da página -->
+    <div class="app-content-header">
+        <div class="container-fluid">
+
+            <div class="row mb-3">
+
+                <div class="col-sm-8">
+                    <h3 class="mb-1">Financeiro</h3>
+
+                    <p class="text-body-secondary mb-0">
+                        Acompanhe as movimentações financeiras da oficina
+                    </p>
+                </div>
+
+                <div class="col-sm-4 d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
+
+                    <span class="badge text-bg-secondary fs-6">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        Mês atual
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
     <div class="app-content">
         <div class="container-fluid">
 
-            <!-- card de entradas -->
-            <div class="row">
-                <div class="col-lg-3 col-6">
-                    <div class="small-box text-bg-primary">
+
+            <!-- Cards financeiros -->
+            <div class="row g-3 mb-4">
+
+                <!-- Entradas -->
+                <div class="col-lg-4 col-md-6">
+
+                    <div class="small-box text-bg-primary h-100">
+
                         <div class="inner">
-                            <h3><?php echo number_format($valor_entrada, 2, ',', '.'); ?></h3>
-                            <p>total Entradas:</p>
+
+                            <p class="mb-1">
+                                Total de Entradas
+                            </p>
+
+                            <h3 class="mb-0">
+                                R$ <?php echo number_format($valor_entrada, 2, ',', '.'); ?>
+                            </h3>
 
                         </div>
 
-                    </div>
-                </div>
-
-
-                <!-- card de saidas -->
-
-
-                <div class="col-lg-3 col-6">
-                    <div class="small-box text-bg-warning">
-                        <div class="inner">
-                            <h3><?php echo number_format($valor_saida, 2, ',', '.'); ?></h3>
-                            <p>total saidas</p>
-
+                        <div class="small-box-icon">
+                            <i class="bi bi-arrow-up-circle"></i>
                         </div>
 
                     </div>
+
                 </div>
 
-                <!-- card de saldo total -->
 
+                <!-- Saídas -->
+                <div class="col-lg-4 col-md-6">
 
-                <div class="col-lg-3 col-6">
-                    <div class="small-box text-bg-success">
+                    <div class="small-box text-bg-warning h-100">
+
                         <div class="inner">
-                            <h3><?php echo number_format($saldo, 2, ',', '.'); ?></h3>
-                            <p>Saldo total </p>
+
+                            <p class="mb-1">
+                                Total de Saídas
+                            </p>
+
+                            <h3 class="mb-0">
+                                R$ <?php echo number_format($valor_saida, 2, ',', '.'); ?>
+                            </h3>
 
                         </div>
 
+                        <div class="small-box-icon">
+                            <i class="bi bi-arrow-down-circle"></i>
+                        </div>
+
                     </div>
+
                 </div>
+
+
+                <!-- Saldo -->
+                <div class="col-lg-4 col-md-12">
+
+                    <div class="small-box <?php echo $saldo >= 0 ? 'text-bg-success' : 'text-bg-danger'; ?> h-100">
+
+                        <div class="inner">
+
+                            <p class="mb-1">
+                                Saldo do Mês
+                            </p>
+
+                            <h3 class="mb-0">
+                                R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
+                            </h3>
+
+                        </div>
+
+                        <div class="small-box-icon">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div>
-                <form action="" method="POST">
+
+            <!-- Conteúdo principal -->
+            <div class="row g-4">
 
 
-                    <div class="mb-3">
-                        <label for="tipo" name="tipo" id="tipo" class="form-label">despesa </label>
-                        <select name="tipo" id="tipo">
-                            <option value="entrada">entrada</option>
-                            <option value="saida">saida</option>
-                        </select>
+                <!-- Formulário -->
+                <div class="col-lg-4">
 
-                    </div>
+                    <div class="card h-100">
 
-                    <div class="mb-3">
-                        <label for="descricao" name="descricao" id="descricao" class="form-label">descricao da despesa </label>
-                        <input type="text" name="descricao" id="descricao" class="form-control">
-                    </div>
+                        <div class="card-header">
 
-                    <div class="mb-3">
-                        <label for="valor" name="valor" id="valor" class="form-label">valor da despesa</label>
-                        <input type="number" step="0.01" name="valor" id="valor" class="form-control">
-                    </div>
+                            <h3 class="card-title">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Nova Movimentação
+                            </h3>
 
-                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-
-                    <button type="submit" class="btn btn-primary mt-3">salvar </button>
-                </form>
-            </div>
+                        </div>
 
 
-            <div>
-                <!-- tabela -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3>Resumo das despesas </h3>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>id</th>
-                                    <th>tipo de despesa </th>
-                                    <th>descricao</th>
-                                    <th>valor</th>
-                                    <th>data</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while ($lista = $listar->fetch_assoc()): ?>
-                                    <tr>
-                                        <td><?php echo intval($lista['id']); ?></td>
-                                        <td><?php echo htmlspecialchars($lista['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars($lista['descricao'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo number_format($lista['valor'], 2, ',', '.'); ?></td>
-                                        <td><?php echo $lista['created_at']; ?></td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+                        <div class="card-body">
+
+                            <form action="" method="POST">
+
+
+                                <!-- Tipo -->
+                                <div class="mb-3">
+
+                                    <label for="tipo" class="form-label">
+                                        Tipo
+                                    </label>
+
+                                    <select
+                                        name="tipo"
+                                        id="tipo"
+                                        class="form-select"
+                                        required>
+
+                                        <option value="entrada">
+                                            Entrada manual
+                                        </option>
+
+                                        <option value="saida">
+                                            Saída
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- Descrição -->
+                                <div class="mb-3">
+
+                                    <label for="descricao" class="form-label">
+                                        Descrição
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="descricao"
+                                        id="descricao"
+                                        class="form-control"
+                                        placeholder="Ex: Compra de óleo"
+                                        required>
+
+                                </div>
+
+
+                                <!-- Valor -->
+                                <div class="mb-3">
+
+                                    <label for="valor" class="form-label">
+                                        Valor
+                                    </label>
+
+                                    <div class="input-group">
+
+                                        <span class="input-group-text">
+                                            R$
+                                        </span>
+
+                                        <input
+                                            type="number"
+                                            name="valor"
+                                            step="0.01"
+                                            min="0.01"
+                                            id="valor"
+                                            class="form-control"
+                                            placeholder="0,00"
+                                            required>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- CSRF -->
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+
+
+                                <!-- Botão -->
+                                <div class="d-grid">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary">
+
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Salvar Movimentação
+
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
 
                     </div>
 
                 </div>
+
+
+                <!-- Movimentações -->
+                <div class="col-lg-8">
+
+                    <div class="card h-100">
+
+                        <div class="card-header d-flex align-items-center">
+
+                            <h3 class="card-title mb-0">
+
+                                <i class="bi bi-list-ul me-2"></i>
+                                Movimentações do Mês
+
+                            </h3>
+
+                        </div>
+
+
+                        <div class="card-body p-0">
+
+                            <div class="table-responsive">
+
+                                <table class="table table-hover table-striped mb-0 align-middle">
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th>
+                                                Tipo
+                                            </th>
+
+                                            <th>
+                                                Descrição
+                                            </th>
+
+                                            <th>
+                                                Valor
+                                            </th>
+
+                                            <th>
+                                                Data
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <tbody>
+
+                                        <?php if ($resultado_lista->num_rows > 0): ?>
+
+                                            <?php while ($listar = $resultado_lista->fetch_assoc()): ?>
+
+                                                <tr>
+
+                                                    <!-- Tipo -->
+                                                    <td>
+
+                                                        <?php if ($listar['tipo'] === 'entrada'): ?>
+
+                                                            <span class="badge text-bg-success">
+
+                                                                <i class="bi bi-arrow-up me-1"></i>
+                                                                Entrada
+
+                                                            </span>
+
+                                                        <?php else: ?>
+
+                                                            <span class="badge text-bg-danger">
+
+                                                                <i class="bi bi-arrow-down me-1"></i>
+                                                                Saída
+
+                                                            </span>
+
+                                                        <?php endif; ?>
+
+                                                    </td>
+
+
+                                                    <!-- Descrição -->
+                                                    <td>
+
+                                                        <?php
+                                                        echo htmlspecialchars(
+                                                            $listar['descricao'],
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        );
+                                                        ?>
+
+                                                    </td>
+
+
+                                                    <!-- Valor -->
+                                                    <td class="fw-semibold">
+
+                                                        R$
+                                                        <?php
+                                                        echo number_format(
+                                                            $listar['valor'],
+                                                            2,
+                                                            ',',
+                                                            '.'
+                                                        );
+                                                        ?>
+
+                                                    </td>
+
+
+                                                    <!-- Data -->
+                                                    <td>
+
+                                                        <?php
+                                                        echo date(
+                                                            'd/m/Y H:i',
+                                                            strtotime($listar['created_at'])
+                                                        );
+                                                        ?>
+
+                                                    </td>
+
+                                                </tr>
+
+                                            <?php endwhile; ?>
+
+
+                                        <?php else: ?>
+
+                                            <tr>
+
+                                                <td
+                                                    colspan="4"
+                                                    class="text-center text-body-secondary py-5">
+
+                                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+
+                                                    Nenhuma movimentação encontrada neste mês.
+
+                                                </td>
+
+                                            </tr>
+
+                                        <?php endif; ?>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
         </div>

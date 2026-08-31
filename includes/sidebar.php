@@ -105,6 +105,44 @@
       <!--begin::Sidebar Wrapper-->
       <div class="sidebar-wrapper">
         <nav class="mt-2">
+
+          <?php
+
+          $paginaAtual = basename($_SERVER['PHP_SELF']);
+
+          $paginasClientes = [
+            'clientes.php',
+            'editar_cliente.php',
+            'cadastrar_cliente.php'
+          ];
+
+          $paginasMotos = [
+            'motos.php',
+            'editar_motos.php',
+            'cadastrar_motos.php'
+          ];
+
+          $paginasServicos = [
+            'servicos.php',
+            'editar_servico.php',
+            'cadastrar_servico.php'
+          ];
+
+          $paginasOrdens = [
+            'listar_ordens.php',
+            'ver_ordem.php',
+            'editar_ordem.php',
+            'ordens.php'
+          ];
+
+          $paginasFinanceiro = [
+            'financeiro.php'
+          ];
+
+          ?>
+
+
+
           <!--begin::Sidebar Menu-->
           <ul
             class="nav sidebar-menu flex-column"
@@ -114,14 +152,14 @@
             data-accordion="false"
             id="navigation">
             <li class="nav-item">
-              <a href="index.php" class="nav-link active">
+              <a href="index.php" class="nav-link <?= $paginaAtual === 'index.php' ? 'active' : '' ?>">
                 <i class="nav-icon bi bi-speedometer"></i>
                 <p>Dashboard</p>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="clientes.php" class="nav-link">
+              <a href="clientes.php" class="nav-link <?= in_array($paginaAtual, $paginasClientes) ? 'active' : '' ?>">
                 <i class="nav-icon bi bi-person"></i>
                 <p>Clientes</p>
               </a>
@@ -129,7 +167,7 @@
 
 
             <li class="nav-item">
-              <a href="motos.php" class="nav-link">
+              <a href="motos.php" class="nav-link <?= in_array($paginaAtual, $paginasMotos) ? 'active' : '' ?>">
                 <img src="img/moto.svg" alt="Moto" class="sidebar-moto-icon">
                 <p>Motos</p>
               </a>
@@ -137,7 +175,7 @@
 
 
             <li class="nav-item">
-              <a href="servicos.php" class="nav-link">
+              <a href="servicos.php" class="nav-link <?= in_array($paginaAtual, $paginasServicos) ? 'active' : '' ?>">
                 <i class="nav-icon bi bi-tools"></i>
                 <p>Serviços</p>
               </a>
@@ -145,7 +183,7 @@
 
 
             <li class="nav-item">
-              <a href="listar_ordens.php" class="nav-link">
+              <a href="listar_ordens.php" class="nav-link <?= in_array($paginaAtual, $paginasOrdens) ? 'active' : '' ?>">
                 <i class="nav-icon bi bi-clipboard-check"></i>
                 <p>Ordens de Serviço</p>
               </a>
@@ -154,7 +192,7 @@
 
 
             <li class="nav-item">
-              <a href="financeiro.php" class="nav-link">
+              <a href="financeiro.php" class="nav-link <?= in_array($paginaAtual, $paginasFinanceiro) ? 'active' : '' ?>">
                 <i class="nav-icon bi bi-cash-coin"></i>
                 <p>Financeiro</p>
               </a>
