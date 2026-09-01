@@ -88,7 +88,21 @@ include "includes/sidebar.php";
 
 
                                     <td><?php echo date('d/m/Y H:i', strtotime($ordem['created_at'])); ?></td>
-                                    <td><a href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>" class="btn btn-primary btn-sm"> ver</a></td>
+                                    <td>
+                                        <a href="ver_ordem.php?id=<?php echo intval($ordem['id']); ?>"
+                                            class="btn btn-primary btn-sm">
+                                            Ver
+                                        </a>
+
+                                        <?php if ($ordem['status'] == 'aberta' || $ordem['status'] == 'em_andamento'): ?>
+
+                                            <a href="editar_ordem.php?id=<?php echo intval($ordem['id']); ?>"
+                                                class="btn btn-warning btn-sm">
+                                                Editar
+                                            </a>
+
+                                        <?php endif; ?>
+                                    </td>
 
                                 </tr>
                             <?php endwhile; ?>

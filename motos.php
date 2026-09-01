@@ -76,9 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $modelo = trim($_POST['modelo']);
     $placa = trim($_POST['placa']);
     $ano = trim($_POST['ano']);
-    $observacoes = trim($_POST['observacoes']);
+    $observacoes = trim($_POST['observacoes'] ?? '');
 
-    if (empty($marca) || empty($modelo) || empty($placa) || empty($ano) || empty($observacoes) || empty($cliente_id)) {
+    if (empty($marca) || empty($modelo) || empty($placa) || empty($ano) || empty($cliente_id)) {
         header("location: motos.php?erro=campos_vazios");
         exit;
     }
@@ -104,7 +104,8 @@ $result_clientes = $conn->query($sql_clientes);
 
 $sql = "SELECT motos.*, clientes.nome AS nome_cliente
  FROM motos
- JOIN clientes ON motos.cliente_id = clientes.id";
+ JOIN clientes ON motos.cliente_id = clientes.id
+ ORDER BY id DESC";
 $result = $conn->query($sql);
 
 

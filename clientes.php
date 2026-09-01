@@ -33,6 +33,10 @@ if (isset($_GET["erro"])) {
         case "token_invalido":
             echo "<script>alert('Requisição inválida. Tente novamente.')</script>";
             break;
+
+        case "campos_vazios":
+            echo "<script>alert('preencha os campos corretamente.')</script>";
+            break;
     }
 }
 
@@ -61,8 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
 
-    if (empty($nome) || empty($telefone) || empty($cpf)) {
+    if (empty($nome) || empty($telefone)) {
         echo "<script>alert('Preencha todos os campos');</script>";
+        header("location: clientes.php?erro=campos_vazios");
         exit;
     }
 
@@ -78,10 +83,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $cliente_id = $conn->insert_id;
 
-        $sql_moto = "INSERT INTO motos (cliente_id, modelo, placa) VALUES(?, ?, ?)";
-        $stmt = $conn->prepare($sql_moto);
-        $stmt->bind_param("iss", $cliente_id, $modelo, $placa);
-        $stmt->execute();
+        if (!empty($modelo) || !empty($placa)) {
+            $sql_moto = "INSERT INTO motos (cliente_id, modelo, placa) VALUES(?, ?, ?)";
+            $stmt = $conn->prepare($sql_moto);
+            $stmt->bind_param("iss", $cliente_id, $modelo, $placa);
+            $stmt->execute();
+        }
+
+
 
         //  $conn->query($sql_moto);
         $conn->commit();
@@ -95,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 }
-$sql_cliente = "SELECT * FROM clientes";
+$sql_cliente = "SELECT * FROM clientes ORDER BY id DESC";
 $result_cliente = $conn->query($sql_cliente);
 
 include 'includes/header.php';
