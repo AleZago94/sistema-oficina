@@ -162,107 +162,94 @@ include 'includes/sidebar.php';
 
                             <!-- Telefone -->
                             <div class="col-md-6 mb-3">
-
-                                <label
-                                    for="telefone"
-                                    class="form-label">
-                                    Telefone
-                                </label>
+                                <label for="telefone" class="form-label">Telefone</label>
 
                                 <input
-                                    type="text"
+                                    type="tel"
                                     name="telefone"
                                     id="telefone"
-                                    class="form-control">
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="row">
-
-                            <!-- CPF -->
-                            <div class="col-md-6 mb-3">
-
-                                <label
-                                    for="cpf"
-                                    class="form-label">
-                                    CPF
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="cpf"
-                                    id="cpf"
-                                    class="form-control">
-
+                                    class="form-control"
+                                    maxlength="15"
+                                    placeholder="(16) 99999-9999">
                             </div>
 
 
-                            <!-- Modelo -->
-                            <div class="col-md-6 mb-3">
+                            <div class="row">
 
-                                <label
-                                    for="modelo"
-                                    class="form-label">
-                                    Modelo da moto
-                                </label>
+                                <!-- CPF -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="cpf" class="form-label">CPF</label>
 
-                                <input
-                                    type="text"
-                                    name="modelo"
-                                    id="modelo"
-                                    class="form-control">
-
-                            </div>
-
-                        </div>
+                                    <input
+                                        type="text"
+                                        name="cpf"
+                                        id="cpf"
+                                        class="form-control"
+                                        maxlength="14"
+                                        inputmode="numeric"
+                                        placeholder="000.000.000-00">
+                                </div>
 
 
-                        <div class="row">
+                                <!-- Modelo -->
+                                <div class="col-md-6 mb-3">
 
-                            <!-- Placa -->
-                            <div class="col-md-6 mb-3">
+                                    <label
+                                        for="modelo"
+                                        class="form-label">
+                                        Modelo da moto
+                                    </label>
 
-                                <label
-                                    for="placa"
-                                    class="form-label">
-                                    Placa
-                                </label>
+                                    <input
+                                        type="text"
+                                        name="modelo"
+                                        id="modelo"
+                                        class="form-control">
 
-                                <input
-                                    type="text"
-                                    name="placa"
-                                    id="placa"
-                                    class="form-control">
+                                </div>
 
                             </div>
 
-                        </div>
+
+                            <div class="row">
+
+                                <!-- Placa -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="placa" class="form-label">Placa</label>
+
+                                    <input
+                                        type="text"
+                                        name="placa"
+                                        id="placa"
+                                        class="form-control"
+                                        maxlength="8"
+                                        placeholder="ABC1D23"
+                                        style="text-transform: uppercase;">
+                                </div>
+                            </div>
 
 
-                        <input
-                            type="hidden"
-                            name="csrf_token"
-                            value="<?php
-                                    echo htmlspecialchars(
-                                        $_SESSION['csrf_token'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    );
-                                    ?>">
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?php
+                                        echo htmlspecialchars(
+                                            $_SESSION['csrf_token'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        );
+                                        ?>">
 
 
-                        <div class="d-flex justify-content-end">
+                            <div class="d-flex justify-content-end">
 
-                            <button
-                                type="submit"
-                                class="btn btn-primary">
-                                Salvar cliente
-                            </button>
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary">
+                                    Salvar cliente
+                                </button>
 
-                        </div>
+                            </div>
 
                     </form>
 
@@ -407,4 +394,48 @@ include 'includes/sidebar.php';
     </div>
 
 </main>
+
+<script>
+    const telefone = document.getElementById('telefone');
+    const cpf = document.getElementById('cpf');
+    const placa = document.getElementById('placa');
+
+    telefone.addEventListener('input', function() {
+        let valor = telefone.value.replace(/\D/g, '');
+
+        valor = valor.substring(0, 11);
+
+        if (valor.length > 10) {
+            valor = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else {
+            valor = valor.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+        }
+
+        telefone.value = valor;
+    });
+
+
+    cpf.addEventListener('input', function() {
+        let valor = cpf.value.replace(/\D/g, '');
+
+        valor = valor.substring(0, 11);
+
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+
+        cpf.value = valor;
+    });
+
+
+    placa.addEventListener('input', function() {
+        let valor = placa.value
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .toUpperCase();
+
+        valor = valor.substring(0, 7);
+
+        placa.value = valor;
+    });
+</script>
 <?php include 'includes/footer.php'; ?>

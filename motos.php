@@ -223,41 +223,44 @@ include "includes/sidebar.php";
                         </div>
 
 
-                        <!-- Placa / Ano -->
-                        <div class="row">
+                        <!-- Placa -->
+                        <div class="col-md-6 mb-3">
 
-                            <div class="col-md-6 mb-3">
+                            <label
+                                for="placa"
+                                class="form-label">
+                                Placa
+                            </label>
 
-                                <label
-                                    for="placa"
-                                    class="form-label">
-                                    Placa
-                                </label>
+                            <input
+                                type="text"
+                                name="placa"
+                                id="placa"
+                                class="form-control"
+                                maxlength="7"
+                                placeholder="ABC1D23"
+                                style="text-transform: uppercase;">
 
-                                <input
-                                    type="text"
-                                    name="placa"
-                                    id="placa"
-                                    class="form-control">
-
-                            </div>
+                        </div>
 
 
-                            <div class="col-md-6 mb-3">
+                        <!-- Ano -->
+                        <div class="col-md-6 mb-3">
 
-                                <label
-                                    for="ano"
-                                    class="form-label">
-                                    Ano de fabricação
-                                </label>
+                            <label
+                                for="ano"
+                                class="form-label">
+                                Ano de fabricação
+                            </label>
 
-                                <input
-                                    type="text"
-                                    name="ano"
-                                    id="ano"
-                                    class="form-control">
-
-                            </div>
+                            <input
+                                type="text"
+                                name="ano"
+                                id="ano"
+                                class="form-control"
+                                maxlength="4"
+                                inputmode="numeric"
+                                placeholder="2026">
 
                         </div>
 
@@ -484,5 +487,29 @@ include "includes/sidebar.php";
     </div>
 
 </main>
+
+
+<script>
+    const placa = document.getElementById('placa');
+    const ano = document.getElementById('ano');
+
+    placa.addEventListener('input', function() {
+        let valor = placa.value
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .toUpperCase();
+
+        valor = valor.substring(0, 7);
+
+        placa.value = valor;
+    });
+
+    ano.addEventListener('input', function() {
+        let valor = ano.value.replace(/\D/g, '');
+
+        valor = valor.substring(0, 4);
+
+        ano.value = valor;
+    });
+</script>
 
 <?php include "includes/footer.php" ?>
