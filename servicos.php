@@ -258,3 +258,5 @@ include "includes/sidebar.php";
     </div>
 
 </main>
+
+<?php include "includes/footer.php"; ?>

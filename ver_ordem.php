@@ -609,10 +609,11 @@ include "includes/sidebar.php";
                         <div class="d-flex flex-wrap gap-2">
 
                             <a
-                                href="imprimir_os.php?id=<?php echo intval($ordem['id']); ?>"
-                                target="_blank"
-                                class="btn btn-secondary">
-                                Imprimir Comanda
+                                class="btn btn-secondary disabled"
+                                aria-disabled="true"
+                                tabindex="-1"
+                                title="Funcionalidade ainda não disponível">
+                                Imprimir comanda
                             </a>
 
 
